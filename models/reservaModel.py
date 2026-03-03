@@ -2,8 +2,8 @@ from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
 class ReservationCreate(BaseModel):
-    user_id: str = Field(..., regex='^[0-9a-fA-F]{24}$')
-    room_id: str = Field(..., regex='^[0-9a-fA-F]{24}$')
+    user_id: str = Field(..., pattern='^[0-9a-fA-F]{24}$')
+    room_id: str = Field(..., pattern='^[0-9a-fA-F]{24}$')
     start_datetime: datetime
     end_datetime: datetime
     status: str
