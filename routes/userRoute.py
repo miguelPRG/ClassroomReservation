@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from models.userModel import UserCreate, UserLogin
 import database
+from bson import ObjectId
 from pwdlib import PasswordHash
 from datetime import datetime
 from controller.jwtValidation import generate_jwt
@@ -60,3 +61,39 @@ async def login_user(user: UserLogin):
         max_age=24 * 3600
     )
     return response
+
+@userRouter.post("/logout", description="Logout a user")
+async def logout_user():
+    response = JSONResponse(content={"message": "Logout bem-sucedido"})
+    response.delete_cookie(key="token")
+    return response
+
+@userRouter.get("/auth", description="Reed JWT token and return user info")
+async def auth_user(request: Request):
+    token = request.cookies.get("token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Token de autenticação não encontrado")
+
+    jwt = request.state.user
+
+    user_id = ObjectId(jwt["user_id"])
+
+    user = await database.user_collection.find_one({"_id": user_id})
+
+    if not user:
+        response = JSONResponse(
+            status_code=401,
+            content={"detail": "Utilizador não encontrado"}
+        )
+        response.delete_cookie(key="token")
+        return response
+
+    return {
+        "message": "Utilizador autenticado",
+        "user": {
+            "id": str(user["_id"]),
+            "name": user.get("name"),
+            "email": user.get("email")
+        }
+    }
+

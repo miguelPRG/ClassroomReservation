@@ -54,10 +54,8 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
     reservation_dict["updated_by"] = user_id
     reservation_dict["updated_at"] = data
 
-    reserva_created= None
-
     try:
-        reserva_created = await database.user_sala_collection.insert_one(reservation_dict)
+        await database.user_sala_collection.insert_one(reservation_dict)
     except DuplicateKeyError:
         raise HTTPException(
             status_code=409,
