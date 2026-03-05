@@ -32,6 +32,7 @@ app.add_middleware(
 
 PUBLIC_PATHS = {
     "/",
+    "/user/login",
     "/user/register",
     "/docs",
     "/openapi.json",
