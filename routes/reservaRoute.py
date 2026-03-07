@@ -8,10 +8,21 @@ from asyncio import gather
 
 reservaRouter = APIRouter(prefix="/reservation", tags=["Reservation"])
 
-@reservaRouter.post("/create", description="Create a new reservation")
-async def create_reservation(reservation: ReservationCreate, request: Request):
-
-    # Converter foreign keys para ObjectId que o datatype dos ids no MongoDB
+@reservaRouter.post(
+    "/create",
+    summary="Criar uma nova reserva",
+    responses={
+        404: {"description": "Utilizador ou Sala não encontrado"},
+        409: {"description": "Já existe uma reserva para esta sala neste intervalo de tempo"}
+    },
+)
+async def create_reservation(
+    reservation: ReservationCreate,
+    request: Request
+):
+    """
+    Cria uma nova reserva. Verifica se o utilizador e a sala existem, e se não houver conflitos de reservas para a mesma sala no mesmo intervalo de tempo, insere a nova reserva na base de dados com as datas de criação e atualização.
+    """
     reservation.user_id = ObjectId(reservation.user_id)
     reservation.room_id = ObjectId(reservation.room_id)
 
