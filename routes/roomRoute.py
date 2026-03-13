@@ -1,16 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
 from bson import ObjectId
-from typing import List
-
-from models.room import RoomCreate, Room
+from models.roomModel import RoomCreate, RoomUpdate
 from database import room_collection
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
 
 # 🔹 Criar sala
-@router.post("/", response_model=Room)
+@router.post("/", response_model=RoomCreate)
 async def create_room(room: RoomCreate):
     room_dict = room.model_dump()
     room_dict["created_at"] = datetime.now()
@@ -23,7 +21,7 @@ async def create_room(room: RoomCreate):
 
 
 # 🔹 Listar salas
-@router.get("/{room_id}", response_model=List[Room])
+@router.get("/{room_id}")
 async def list_rooms(room_id: str=None):
     rooms = []
     async for room in room_collection.find(filter={"_id": ObjectId(room_id)} if room_id else {} ):
@@ -34,8 +32,8 @@ async def list_rooms(room_id: str=None):
 
 
 # 🔹 Atualizar
-@router.put("/{room_id}", response_model=Room)
-async def update_room(room_id: str, room: RoomCreate):
+@router.put("/{room_id}")
+async def update_room(room_id: str, room: RoomUpdate):
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID inválido")
 
