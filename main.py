@@ -14,8 +14,13 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Reserva de Salas API",
-    tags=["Reserva de Salas API"],
+    title="Reserva de Salas",
+    tags=["Reserva de Salas"],
+    description =" Uma aplicação de reserva de salas.",
+    contact ={
+    " name ": {" Miguel Gonçalves", "Cleide Ferreira"},
+    " email ": "miguelprg@ua.pt",
+    } ,
     lifespan=lifespan,
 )
 

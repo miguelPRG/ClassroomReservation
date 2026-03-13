@@ -1,3 +1,5 @@
+from http.client import responses
+
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from models.userModel import UserCreate, UserLogin
@@ -10,10 +12,19 @@ from controller.jwtValidation import generate_jwt
 userRouter = APIRouter(prefix="/user", tags=["User"])
 password_hash = PasswordHash.recommended()
 
-@userRouter.post("/register", description="Create a new user")
+@userRouter.post(
+    "/register", 
+    summary="Criar um novo utilizador",
+    responses={
+        400: {"description": "Utilizador já existe"},
+        500: {"description": "Erro ao criar utilizador"}
+    },
+    
+)
 async def create_user(user: UserCreate):
-    if database.user_collection is None:
-        raise HTTPException(status_code=500, detail="Base de dados não inicializada")
+    """
+    Cria um novo utilizador. Verifica se o email já existe, e se não existir, insere o novo utilizador na base de dados com a password hashada e as datas de criação e atualização."
+    """
 
     existing_user = await database.user_collection.find_one({"email": user.email})
 
@@ -34,10 +45,15 @@ async def create_user(user: UserCreate):
 
     return {"message": "Utilizador criado com sucesso"}
 
-@userRouter.post("/login", description="Authenticate a user")
+@userRouter.post("/login", 
+    summary="Autenticar um utilizador",
+    responses={
+        400: {"description": "Email ou password inválidos"},
+    }
+)
+
 async def login_user(user: UserLogin):
-    if database.user_collection is None:
-        raise HTTPException(status_code=500, detail="Base de dados não inicializada")
+    """Autentica um utilizador. Verifica se o email existe e se a password é correta. Se a autenticação for bem-sucedida, gera um token JWT, atualiza a data do último login e retorna uma resposta com o token definido como cookie."""
 
     existing_user = await database.user_collection.find_one({"email": user.email})
 
@@ -62,14 +78,20 @@ async def login_user(user: UserLogin):
     )
     return response
 
-@userRouter.post("/logout", description="Logout a user")
+@userRouter.post("/logout", summary="Logout do utilizador")
 async def logout_user():
+    """
+    Faz logout de um utilizador. Remove o cookie do token JWT para efetuar o logout do utilizador.
+    """
     response = JSONResponse(content={"message": "Logout bem-sucedido"})
     response.delete_cookie(key="token")
     return response
 
-@userRouter.get("/auth", description="Reed JWT token and return user info")
+@userRouter.get("/auth", summary="Read JWT token and return user info", responses={
+    
+})
 async def auth_user(request: Request):
+    """Verifica o token JWT do utilizador. Se o token for válido, retorna as informações do utilizador. Se o token for inválido ou expirado, retorna um erro de autenticação."""
     token = request.cookies.get("token")
     if not token:
         raise HTTPException(status_code=401, detail="Token de autenticação não encontrado")

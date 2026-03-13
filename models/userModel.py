@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-
 class UserCreate(BaseModel):
     nome: str = Field(..., max_length=50)
     email: EmailStr = Field(..., max_length=150)
