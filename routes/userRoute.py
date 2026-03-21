@@ -23,7 +23,7 @@ password_hash = PasswordHash.recommended()
 )
 async def create_user(user: UserCreate):
     """
-    Cria um novo utilizador. Verifica se o email já existe, e se não existir, insere o novo utilizador na base de dados com a password hashada e as datas de criação e atualização."
+    Cria um novo utilizador. Verifica se o email já existe, e se não existir, insere o novo utilizador na base de dados com a password hashada e as datas de criação e atualização.
     """
 
     existing_user = await database.user_collection.find_one({"email": user.email})
