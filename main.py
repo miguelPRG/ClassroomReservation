@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import init_database
 from routes.userRoute import userRouter
 from routes.reservaRoute import reservaRouter
+from routes.roomRoute import roomRouter
 from controller.jwtValidation import validate_jwt  # ajusta o nome se no teu ficheiro for diferente
 
 @asynccontextmanager
@@ -68,6 +69,7 @@ async def jwt_cookie_middleware(request: Request, call_next):
 # Rotas incluidas
 app.include_router(userRouter)
 app.include_router(reservaRouter)
+app.include_router(roomRouter)
 
 @app.get("/", tags=["Root"], description="Returns a greeting message")
 def read_root():
