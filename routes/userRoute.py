@@ -2,7 +2,7 @@ from http.client import responses
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from models.userModel import UserCreate, UserLogin
+from models.userModel import UserCreate, UserLogin, UserGet
 import database
 from bson import ObjectId
 from pwdlib import PasswordHash
@@ -45,7 +45,8 @@ async def create_user(user: UserCreate):
 
     return {"message": "Utilizador criado com sucesso"}
 
-@userRouter.post("/login", 
+@userRouter.post(
+    "/login", 
     summary="Autenticar um utilizador",
     responses={
         400: {"description": "Email ou password inválidos"},
@@ -87,14 +88,15 @@ async def logout_user():
     response.delete_cookie(key="token")
     return response
 
-@userRouter.get("/auth", summary="Read JWT token and return user info", responses={
-    
-})
+@userRouter.get("/auth", 
+                summary="Ler informações do utilizador autenticado", 
+                response_model=UserGet,
+                responses={
+                    401: {"description": "Utilizador não encontrado"},
+                }
+                )
 async def auth_user(request: Request):
-    """Verifica o token JWT do utilizador. Se o token for válido, retorna as informações do utilizador. Se o token for inválido ou expirado, retorna um erro de autenticação."""
-    token = request.cookies.get("token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Token de autenticação não encontrado")
+    """Verifica o token JWT do utilizador. Se o token for válido, retorna as informações do utilizador. Se o token for inválido ou expirado, retorna um erro de autenticação."""   
 
     jwt = request.state.user
 
@@ -110,12 +112,12 @@ async def auth_user(request: Request):
         response.delete_cookie(key="token")
         return response
 
-    return {
-        "message": "Utilizador autenticado",
-        "user": {
-            "id": str(user["_id"]),
-            "name": user.get("name"),
-            "email": user.get("email")
-        }
-    }
+    return UserGet(
+        id=str(user["_id"]),
+        nome=user.get("nome"),
+        email=user.get("email"),
+        created_at=user.get("created_at"),
+        updated_at=user.get("updated_at"),
+        last_login=user.get("last_login")
+    )
 
