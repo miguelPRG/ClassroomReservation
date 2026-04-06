@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -8,11 +9,25 @@ from routes.reservaRoute import reservaRouter
 from routes.roomRoute import roomRouter
 from controller.jwtValidation import validate_jwt  # ajusta o nome se no teu ficheiro for diferente
 
+# Configuração do Logger
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Iniciando aplicação...")
     if await init_database():
-        print("Base de dados inicializada com sucesso.")
+        logger.info("Base de dados inicializada com sucesso.")
+    else:
+        logger.error("Erro ao inicializar a base de dados.")
     yield
+    logger.info("Encerrando aplicação.")
 
 app = FastAPI(
     title="Reserva de Salas",
@@ -26,9 +41,12 @@ app = FastAPI(
 )
 
 # Middleware para permitir CORS (Cross-Origin Resource Sharing). CORS é necessário para permitir que o frontend acesse a API, especialmente se estiverem em domínios diferentes.
+
+ALLOW_ORIGINS = ["*"]  # Permite todas as origens.
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # mete aqui o URL real do frontend
+    allow_origins=ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,33 +62,50 @@ PUBLIC_PATHS = {
 }
 
 @app.middleware("http")
-async def jwt_cookie_middleware(request: Request, call_next):
+async def middleware(request: Request, call_next):
+        
+    origin = request.headers.get("origin") or request.client.host
+    logger.info(f"Request: {request.method} {request.url.path} - Origin: {origin}")    
+
+    if ALLOW_ORIGINS != ["*"] and origin not in ALLOW_ORIGINS:
+        logger.warning(f"Origem não permitida: {origin}")
+        return JSONResponse(status_code=403, content={"detail": "Origem não permitida"})
     
     path = request.url.path
-
+    
     # rotas públicas
     if path in PUBLIC_PATHS:
-        return await call_next(request)
+        logger.debug(f"Rota pública acedida: {path}")
+        response = await call_next(request)
+        logger.info(f"Response: {path} - Status {response.status_code}")
+        return response
 
     token = request.cookies.get("token")
     if not token:
+        logger.warning(f"Token não fornecido para rota protegida: {path}")
         return JSONResponse(status_code=401, content={"detail": "Não autenticado"})
 
     try:
         payload = validate_jwt(token)
         if not payload:
+            logger.warning(f"Token inválido para rota: {path}")
             return JSONResponse(status_code=401, content={"detail": "Token inválido"})
         request.state.user = payload
-    except Exception:
+        logger.debug(f"Token validado com sucesso para utilizador: {payload.get('sub')}")
+    except Exception as e:
+        logger.error(f"Erro na validação de token: {str(e)}")
         return JSONResponse(status_code=401, content={"detail": "Token inválido"})
 
-    return await call_next(request)
+    response = await call_next(request)
+    logger.info(f"Response: {path} - Status {response.status_code}")
+    return response
 
-# Rotas incluidas
 app.include_router(userRouter)
 app.include_router(reservaRouter)
 app.include_router(roomRouter)
 
 @app.get("/", tags=["Root"], description="Returns a greeting message")
 def read_root():
+    logger.info("Root endpoint acedido")
     return {"Hello": "World"}
+

@@ -1,5 +1,4 @@
-from http.client import responses
-
+import logging
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from models.userModel import UserCreate, UserLogin, UserGet
@@ -11,6 +10,7 @@ from controller.jwtValidation import generate_jwt
 
 userRouter = APIRouter(prefix="/user", tags=["User"])
 password_hash = PasswordHash.recommended()
+logger = logging.getLogger(__name__)
 
 @userRouter.post(
     "/register", 
@@ -29,10 +29,12 @@ async def create_user(user: UserCreate):
     existing_user = await database.user_collection.find_one({"email": user.email})
 
     if existing_user:
+        logger.warning(f"Tentativa de registo com email já existente: {user.email}")
         raise HTTPException(status_code=400, detail="Já existe um utilizador com esse email")
 
     user_dict = user.model_dump()
     user_dict["password"] = password_hash.hash(user.password)
+    user_dict["role"] = "user"
     data = datetime.now()
     user_dict["created_at"] = data
     user_dict["updated_at"] = data
@@ -41,6 +43,7 @@ async def create_user(user: UserCreate):
     try:
         await database.user_collection.insert_one(user_dict)
     except Exception as e:
+        logger.error(f"Erro ao criar utilizador {user.email}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erro ao criar utilizador: {str(e)}")
 
     return {"message": "Utilizador criado com sucesso"}
@@ -59,6 +62,7 @@ async def login_user(user: UserLogin):
     existing_user = await database.user_collection.find_one({"email": user.email})
 
     if not existing_user or not password_hash.verify(user.password, existing_user["password"]):
+        logger.warning(f"Falha de login para email: {user.email}")
         raise HTTPException(status_code=400, detail="Email ou password inválidos")
 
     jwt_token = generate_jwt(str(existing_user["_id"]))
@@ -105,6 +109,7 @@ async def auth_user(request: Request):
     user = await database.user_collection.find_one({"_id": user_id})
 
     if not user:
+        logger.warning(f"Utilizador não encontrado para token com user_id={jwt.get('user_id')}")
         response = JSONResponse(
             status_code=401,
             content={"detail": "Utilizador não encontrado"}
