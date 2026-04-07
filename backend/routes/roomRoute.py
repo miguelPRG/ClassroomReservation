@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
 from bson import ObjectId
-from models.roomModel import RoomCreate, RoomUpdate
-import database
+from backend.models.roomModel import RoomCreate, RoomUpdate
+import backend.database as database
 
 roomRouter = APIRouter(prefix="/rooms", tags=["Rooms"])
 

@@ -1,0 +1,16 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AppShell } from "@/components/layout/app-shell";
+import { DashboardPage } from "@/pages/dashboard-page";
+import { NewReservationPage } from "@/pages/new-reservation-page";
+
+export function AppRouter() {
+  return (
+    <Routes>
+      <Route element={<AppShell />}>
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/reservations/new" element={<NewReservationPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+  );
+}

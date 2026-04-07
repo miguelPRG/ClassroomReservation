@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from pymongo.errors import DuplicateKeyError
-from models.reservaModel import ReservationCreate
-import database
+from backend.models.reservaModel import ReservationCreate
+import backend.database as database
 from bson import ObjectId
 from datetime import datetime
 from asyncio import gather

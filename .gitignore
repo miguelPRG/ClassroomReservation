@@ -5,3 +5,7 @@ __pycache__/
 # Virtual environments
 .venv/
 .env
+
+node_modules/
+dist/
+build/

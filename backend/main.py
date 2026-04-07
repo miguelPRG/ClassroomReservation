@@ -3,11 +3,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from database import init_database
-from routes.userRoute import userRouter
-from routes.reservaRoute import reservaRouter
-from routes.roomRoute import roomRouter
-from controller.jwtValidation import validate_jwt  # ajusta o nome se no teu ficheiro for diferente
+from backend.database import init_database
+from backend.routes.userRoute import userRouter
+from backend.routes.reservaRoute import reservaRouter
+from backend.routes.roomRoute import roomRouter
+from backend.controller.jwtValidation import validate_jwt  # ajusta o nome se no teu ficheiro for diferente
 
 # Configuração do Logger
 logging.basicConfig(

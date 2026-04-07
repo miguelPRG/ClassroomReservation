@@ -1,12 +1,12 @@
 import logging
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from models.userModel import UserCreate, UserLogin, UserGet
-import database
+from backend.models.userModel import UserCreate, UserLogin, UserGet
+import backend.database as database
 from bson import ObjectId
 from pwdlib import PasswordHash
 from datetime import datetime
-from controller.jwtValidation import generate_jwt
+from backend.controller.jwtValidation import generate_jwt
 
 userRouter = APIRouter(prefix="/user", tags=["User"])
 password_hash = PasswordHash.recommended()
