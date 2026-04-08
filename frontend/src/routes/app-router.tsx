@@ -1,16 +1,22 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { AppShell } from "@/components/layout/app-shell";
-import { DashboardPage } from "@/pages/dashboard-page";
-import { NewReservationPage } from "@/pages/new-reservation-page";
+import { lazy, Suspense } from "react"
+import { createBrowserRouter } from "react-router-dom"
+import { ProtectedRoute, PublicRoute } from "@/routes/route-guards"
 
-export function AppRouter() {
-  return (
-    <Routes>
-      <Route element={<AppShell />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/reservations/new" element={<NewReservationPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
-  );
-}
+const DashboardPage = lazy(() => import("@/pages/dashboard-page").then(m => ({ default: m.DashboardPage })))
+const LoginPage = lazy(() => import("@/pages/login-page").then(m => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import("@/pages/register-page").then(m => ({ default: m.RegisterPage })))
+
+// Define the application routes with route guards for public and protected pages
+export const appRouter = createBrowserRouter([
+  {
+    element: <PublicRoute />,
+    children: [
+      { path: "/login", element: <Suspense fallback={<div>Carregando...</div>}><LoginPage /></Suspense> },
+      { path: "/register", element: <Suspense fallback={<div>Carregando...</div>}><RegisterPage /></Suspense> },
+    ],
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [{ path: "/", element: <Suspense fallback={<div>Carregando...</div>}><DashboardPage /></Suspense> }],
+  },
+])

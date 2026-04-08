@@ -4,13 +4,16 @@ import secrets
 import base64
 from datetime import datetime, timedelta, timezone
 
+
 def _generate_secret() -> str:
-    return base64.urlsafe_b64encode(secrets.token_bytes(64)).decode().rstrip("=")
+    key = base64.urlsafe_b64encode(secrets.token_bytes(64)).decode().rstrip("=")
+    print("Guarda esta chave de segurança no .env: ", key)
 
 # Em produção, defina JWT_SECRET_KEY no .env
 SECRET_KEY = os.getenv("JWT_SECRET_KEY") or _generate_secret()
 ALGORITHM = "HS512"
 EXPIRATION_HOURS = 1
+
 
 def generate_jwt(user_id: str, role: str = "user") -> str:
     now = datetime.now(timezone.utc)
@@ -18,7 +21,7 @@ def generate_jwt(user_id: str, role: str = "user") -> str:
 
     payload = {
         "user_id": user_id,
-        "role" : role, 
+        "role": role,
         "iat": int(now.timestamp()),
         "exp": int(exp.timestamp()),
     }
@@ -33,6 +36,6 @@ def validate_jwt(token: str) -> dict:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
-        raise Exception('Token expired')
+        raise Exception("Token expired")
     except jwt.InvalidTokenError:
-        raise Exception('Invalid token')
+        raise Exception("Invalid token")

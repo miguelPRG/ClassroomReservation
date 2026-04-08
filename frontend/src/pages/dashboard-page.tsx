@@ -1,53 +1,56 @@
-import { Link } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useDashboardData } from "@/hooks/use-dashboard-data";
+import { useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuthStore } from "@/stores/auth-store"
+import {useLogout} from "@/hooks/use-auth"
 
 export function DashboardPage() {
-  const { rooms, reservations, loading } = useDashboardData();
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const user = useAuthStore((state) => state.user)
+  const logout = useLogout()  // Chame aqui, no corpo do componente
+
+  const handleLogout = () => {
+    logout()  // Chame a função retornada
+    queryClient.removeQueries({ queryKey: ["me"] })
+    navigate("/login")
+  }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground">
-          Frontend para o backend de salas, usuarios e reservas.
-        </p>
-        <Link to="/reservations/new">
-          <Button>Nova Reserva</Button>
-        </Link>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Salas ativas</p>
-          <p className="mt-2 text-2xl font-semibold">{rooms.filter((room) => room.is_active).length}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Reservas totais</p>
-          <p className="mt-2 text-2xl font-semibold">{reservations.length}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Status</p>
-          <p className="mt-2 text-sm font-semibold">{loading ? "Sincronizando com backend..." : "Dados carregados"}</p>
-        </Card>
-      </div>
-
-      <Card className="p-4">
-        <h2 className="mb-3 text-base font-semibold">Ultimas reservas</h2>
-        {reservations.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma reserva encontrada.</p>
-        ) : (
-          <ul className="space-y-2">
-            {reservations.slice(0, 8).map((reservation) => (
-              <li key={reservation.id} className="rounded-md border border-border p-3 text-sm">
-                <span className="font-medium">Reserva #{reservation.id}</span>
-                <span className="mx-2 text-muted-foreground">Sala {reservation.room_id}</span>
-                <span className="text-muted-foreground">{reservation.status}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl items-start px-4 py-8 md:py-12">
+      <Card className="w-full">
+        <CardHeader className="flex flex-col items-start justify-between gap-4 border-b border-border/60 md:flex-row md:items-center">
+          <div>
+            <CardTitle className="text-2xl">Dashboard</CardTitle>
+            <CardDescription className="mt-1">Área autenticada da aplicação.</CardDescription>
+          </div>
+          <Button variant="outline" className="w-full md:w-auto" onClick={handleLogout}>
+            Terminar sessão
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-6 pt-2">
+          <p className="text-sm text-muted-foreground/90">
+            Sessão ativa.
+          </p>
+          {user ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-xl border border-border/70 bg-muted/25 p-4">
+                <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">Nome</p>
+                <p className="text-base font-medium">{user.nome}</p>
+              </div>
+              <div className="rounded-xl border border-border/70 bg-muted/25 p-4">
+                <p className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">Email</p>
+                <p className="text-base font-medium">{user.email}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="rounded-xl border border-dashed border-border/70 bg-muted/20 p-4 text-muted-foreground">
+              Sem dados de utilizador disponíveis.
+            </p>
+          )}
+        </CardContent>
       </Card>
-    </div>
-  );
+    </main>
+  )
 }

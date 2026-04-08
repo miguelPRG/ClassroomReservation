@@ -6,11 +6,12 @@ from typing import Optional
 class RoomCreate(BaseModel):
     name: Optional[str] = Field(..., max_length=255)
     location: str = Field(..., max_length=255)
-    capacity: int  = Field(..., le=150)
+    capacity: int = Field(..., le=150)
     capacity_exam: int = Field(..., le=30)
-    active: bool 
+    active: bool
     characteristic_name: str = Field(..., max_length=150)
     building_identifier: str = Field(..., max_length=50)
+
 
 class RoomUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=150)
@@ -20,6 +21,3 @@ class RoomUpdate(BaseModel):
     active: Optional[bool] = None
     characteristic_name: Optional[str] = Field(None, max_length=150)
     building_identifier: Optional[str] = Field(None, max_length=50)
-
-
-
