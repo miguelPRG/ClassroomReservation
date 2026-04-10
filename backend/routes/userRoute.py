@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from models.userModel import UserCreate, UserLogin, UserGet
+from models.userModel import UserCreate, UserLogin, UserLogout, UserGet
 import database
 from bson import ObjectId
 from pwdlib import PasswordHash
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @userRouter.post(
     "/register",
     summary="Criar um novo utilizador",
+    response_model=UserGet,
     responses={
         400: {"description": "Utilizador já existe"},
         500: {"description": "Erro ao criar utilizador"},
@@ -74,10 +75,10 @@ async def create_user(user: UserCreate):
 @userRouter.post(
     "/login",
     summary="Autenticar um utilizador",
+    response_model=UserGet,
     responses={
         400: {"description": "Email ou password inválidos"},
     },
-    response_model=UserGet
 )
 async def login_user(user: UserLogin):
     """Autentica um utilizador. Verifica se o email existe e se a password é correta. Se a autenticação for bem-sucedida, gera um token JWT, atualiza a data do último login e retorna uma resposta com o token definido como cookie."""
@@ -118,7 +119,11 @@ async def login_user(user: UserLogin):
     return response
 
 
-@userRouter.post("/logout", summary="Logout do utilizador")
+@userRouter.post(
+    "/logout", 
+    summary="Logout do utilizador",
+    response_model=UserLogout,
+)
 async def logout_user():
     """
     Faz logout de um utilizador. Remove o cookie do token JWT para efetuar o logout do utilizador.

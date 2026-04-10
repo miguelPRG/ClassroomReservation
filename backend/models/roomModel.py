@@ -12,6 +12,17 @@ class RoomCreate(BaseModel):
     characteristic_name: str = Field(..., max_length=150)
     building_identifier: str = Field(..., max_length=50)
 
+class RoomGet(BaseModel):
+    id: str
+    name: Optional[str] = Field(..., max_length=255)
+    location: str = Field(..., max_length=255)
+    capacity: int = Field(..., le=150)
+    capacity_exam: int = Field(..., le=30)
+    active: bool
+    characteristic_name: str = Field(..., max_length=150)
+    building_identifier: str = Field(..., max_length=50)
+    created_at: datetime
+    updated_at: datetime
 
 class RoomUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=150)
@@ -21,3 +32,6 @@ class RoomUpdate(BaseModel):
     active: Optional[bool] = None
     characteristic_name: Optional[str] = Field(None, max_length=150)
     building_identifier: Optional[str] = Field(None, max_length=50)
+
+class RoomMessage(BaseModel):
+    message: str

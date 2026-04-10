@@ -6,9 +6,7 @@ from database import init_database
 from routes.userRoute import userRouter
 from routes.reservaRoute import reservaRouter
 from routes.roomRoute import roomRouter
-from controller.jwtValidation import (
-    validate_jwt,
-)  # ajusta o nome se no teu ficheiro for diferente
+from controller.jwtValidation import validate_jwt
 
 # Configuração do Logger
 logging.basicConfig(
@@ -43,7 +41,7 @@ app = FastAPI(
 
 # Middleware para permitir CORS (Cross-Origin Resource Sharing). CORS é necessário para permitir que o frontend acesse a API, especialmente se estiverem em domínios diferentes.
 
-ALLOW_ORIGINS = ["http://localhost:3000"]
+ALLOW_ORIGINS = ["127.0.0.1"]
 
 app.add_middleware(
     CORSMiddleware,
