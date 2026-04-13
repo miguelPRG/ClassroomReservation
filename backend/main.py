@@ -1,7 +1,8 @@
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from database import init_database
 from routes.userRoute import userRouter
 from routes.reservaRoute import reservaRouter
@@ -41,7 +42,7 @@ app = FastAPI(
 
 # Middleware para permitir CORS (Cross-Origin Resource Sharing). CORS é necessário para permitir que o frontend acesse a API, especialmente se estiverem em domínios diferentes.
 
-ALLOW_ORIGINS = ["127.0.0.1"]
+ALLOW_ORIGINS = ["http://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -73,7 +74,10 @@ async def middleware(request: Request, call_next):
 
     if origin not in ALLOW_ORIGINS:
         logger.warning(f"Origem não permitida: {origin}")
-        raise HTTPException(status_code=403, detail="Origem não permitida")
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Origem não permitida"}
+        )
 
     path = request.url.path
 
@@ -87,20 +91,29 @@ async def middleware(request: Request, call_next):
     token = request.cookies.get("token")
     if not token:
         logger.warning(f"Token não fornecido para rota protegida: {path}")
-        raise HTTPException(status_code=401, detail="Não autenticado")
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Não autenticado"}
+        )
 
     try:
         payload = validate_jwt(token)
         if not payload:
             logger.warning(f"Token inválido para rota: {path}")
-            raise HTTPException(status_code=401, detail="Token inválido")
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Token inválido"}
+            )
         request.state.user = payload
         logger.debug(
             f"Token validado com sucesso para utilizador: {payload.get('sub')}"
         )
     except Exception as e:
         logger.error(f"Erro na validação de token: {str(e)}")
-        raise HTTPException(status_code=401, detail="Token inválido")
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Token inválido"}
+        )
 
     response = await call_next(request)
     logger.info(f"Response: {path} - Status {response.status_code}")

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,7 +22,6 @@ const schema = z
 type RegisterFormValues = z.infer<typeof schema>
 
 export function RegisterPage() {
-  const navigate = useNavigate()
   const registerMutation = useRegister()
 
   const {
@@ -41,11 +40,10 @@ export function RegisterPage() {
 
   const onSubmit = async (values: RegisterFormValues) => {
     await registerMutation.mutateAsync({
-      name: values.name,
+      nome: values.name,
       email: values.email,
       password: values.password,
     })
-    navigate("/app")
   }
 
   return (

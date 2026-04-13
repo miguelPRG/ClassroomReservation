@@ -19,7 +19,7 @@ roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
 )
 async def create_room(room: RoomCreate):
     """
-    Cria uma nova sala com os detalhes fornecidos de RoomCreate
+    Cria uma nova sala com oPartial<CreateRoomPayload>) =>s detalhes fornecidos de RoomCreate
     """
     room_dict = room.model_dump()
     room_dict["created_at"] = datetime.now()
