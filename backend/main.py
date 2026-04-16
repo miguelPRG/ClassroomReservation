@@ -42,13 +42,13 @@ app = FastAPI(
 
 # Middleware para permitir CORS (Cross-Origin Resource Sharing). CORS é necessário para permitir que o frontend acesse a API, especialmente se estiverem em domínios diferentes.
 
-ALLOW_ORIGINS = ["http://localhost:3000"]
+ALLOW_ORIGINS = ["http://localhost:3000", "127.0.0.1"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOW_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

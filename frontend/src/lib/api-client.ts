@@ -1,5 +1,5 @@
 import type { AuthUser, LoginPayload, RegisterPayload } from "@/types/auth"
-import type { CreateRoomPayload, Room, UpdateRoomPayload } from "@/types/room"
+import type { RoomPayload, Room } from "@/types/room"
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
@@ -61,7 +61,7 @@ export const authApi = {
 }
 
 export const roomApi = {
-  create: (payload: CreateRoomPayload) =>
+  create: (payload: RoomPayload) =>
     request("/room", {
       method: "POST",
       body: JSON.stringify(payload),
@@ -70,7 +70,7 @@ export const roomApi = {
     request<Room[]>(`/room${roomID ? `/${roomID}` : ""}`, {
       method: "GET",
     }),
-  put: (roomID: string, payload: Partial<UpdateRoomPayload>) =>
+  put: (roomID: string, payload: RoomPayload) =>
     request(`/room/${roomID}`, {
       method: "PUT",
       body: JSON.stringify(payload),

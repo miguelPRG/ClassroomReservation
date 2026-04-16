@@ -27,7 +27,7 @@ export const roomColumns = [
   columnHelper.accessor("building_identifier", {
     header: "Prédio",
   }),
-  columnHelper.accessor("active", {
+  columnHelper.accessor("isFree", {
     header: "Status",
     cell: (info) => (
       <div className="flex justify-center">
@@ -36,7 +36,7 @@ export const roomColumns = [
             ? "bg-green-100 text-green-800"
             : "bg-red-100 text-red-800"
         }`}>
-          {info.getValue() ? "Ativo" : "Inativo"}
+          {info.getValue() ? "Livre" : "Ocupada"}
         </span>
       </div>
     ),

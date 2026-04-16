@@ -2,8 +2,7 @@ from fastapi import APIRouter, HTTPException
 from datetime import datetime
 from bson import ObjectId
 from models.roomModel import RoomCreate, RoomGet, RoomUpdate, RoomMessage
-from database import sala_collection
-
+import database
 roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
 
 
@@ -22,59 +21,64 @@ async def create_room(room: RoomCreate):
     Cria uma nova sala com oPartial<CreateRoomPayload>) =>s detalhes fornecidos de RoomCreate
     """
     room_dict = room.model_dump()
+    room_dict["isFree"] = True
     room_dict["created_at"] = datetime.now()
     room_dict["updated_at"] = datetime.now()
 
     try:
-        result = await sala_collection.insert_one(room_dict)
+        result = await database.sala_collection.insert_one(room_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao criar sala: {str(e)}")
 
     return {"message": "Sala criada com sucesso", "id": str(result.inserted_id)}
 
+# 🔹 Listar todas as salas
+@roomRouter.get(
+    "/",
+    summary="Listar todas as salas",
+    response_model=list[RoomGet],
+    responses={
+        500: {"description": "Erro ao listar salas"},
+    },
+)
+async def list_all_rooms(skip: int = 0):
+    """
+    Retorna todas as salas com paginação
+    """
+    limit = 10
+    cursor = database.sala_collection.find().limit(limit).skip(skip)
+    rooms = []
+    async for room in cursor:
+        room["id"] = str(room["_id"])
+        del room["_id"]
+        rooms.append(room)
+    return rooms
 
-# 🔹 Listar salas
+
+# 🔹 Obter uma sala específica
 @roomRouter.get(
     "/{room_id}",
-    summary="Listar salas",
+    summary="Obter uma sala por ID",
     response_model=list[RoomGet],
     responses={
         400: {"description": "ID de sala inválido"},
         404: {"description": "Sala não encontrada"},
     },
-
 )
-async def list_rooms(room_id: str = None, skip: int = 0):
+async def get_room(room_id: str):
     """
-    Sacamos todas as salas ou uma sala especifica se o ID for fornecido. Se room_id for None, retorna todas as salas. Caso contrário, retorna a sala correspondente ao ID.
+    Retorna uma sala específica pelo ID
     """
+    if not ObjectId.is_valid(room_id):
+        raise HTTPException(status_code=400, detail="ID de sala inválido")
 
-    limit = 10
+    sala = await database.sala_collection.find_one({"_id": ObjectId(room_id)})
+    if not sala:
+        raise HTTPException(status_code=404, detail="Sala não encontrada")
 
-    rooms = []
-
-    if not room_id:
-        cursor = sala_collection.find().limit(limit).skip(skip)
-        async for room in cursor:
-            room["id"] = str(room["_id"])
-            del room["_id"]
-            rooms.append(room)
-        return rooms
-
-    else:
-        
-        if not ObjectId.is_valid(room_id):
-            raise HTTPException(status_code=400, detail="ID de sala inválido")
-
-        sala = await sala_collection.find_one({"_id": ObjectId(room_id)})
-        if not sala:
-            raise HTTPException(status_code=404, detail="Sala não encontrada")
-
-        sala["id"] = str(sala["_id"])
-        del sala["_id"]
-        rooms.append(sala)
-    
-    return rooms
+    sala["id"] = str(sala["_id"])
+    del sala["_id"]
+    return [sala]
 
 
 # 🔹 Atualizar
@@ -98,7 +102,7 @@ async def update_room(room_id: str, room: RoomUpdate):
     update_data = room.model_dump()
     update_data["updated_at"] = datetime.now()
 
-    result = await sala_collection.update_one(
+    result = await database.sala_collection.update_one(
         {"_id": ObjectId(room_id)}, {"$set": update_data}
     )
 
@@ -125,7 +129,7 @@ async def delete_room(room_id: str):
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID inválido")
 
-    result = await sala_collection.delete_one({"_id": ObjectId(room_id)})
+    result = await database.sala_collection.delete_one({"_id": ObjectId(room_id)})
 
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Sala não encontrada")

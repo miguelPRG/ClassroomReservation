@@ -1,20 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "react-toastify"
 import { ApiError, roomApi } from "@/lib/api-client"
-import type { CreateRoomPayload, UpdateRoomPayload } from "@/types/room"
-
-export function useRoomQuery(roomID: string | null = null) {
-  return useQuery({
-    queryKey: ["rooms", roomID],
-    queryFn: () => roomApi.get(roomID),
-  })
-}
+import type { RoomPayload } from "@/types/room"
 
 export function useRoomCreate() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (payload: CreateRoomPayload) => roomApi.create(payload),
+    mutationFn: (payload: RoomPayload) => roomApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] })
       toast.success("Sala criada com sucesso.")
@@ -26,11 +19,18 @@ export function useRoomCreate() {
   })
 }
 
+export function useRoomQuery(roomID: string | null = null) {
+  return useQuery({
+    queryKey: ["rooms", roomID],
+    queryFn: () => roomApi.get(roomID),
+  })
+}
+
 export function useRoomUpdate() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ roomID, payload }: { roomID: string; payload: Partial<UpdateRoomPayload> }) =>
+    mutationFn: ({ roomID, payload }: { roomID: string; payload: RoomPayload }) =>
       roomApi.put(roomID, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] })

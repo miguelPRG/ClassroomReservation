@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
 from typing import Optional
 
@@ -8,7 +8,6 @@ class RoomCreate(BaseModel):
     location: str = Field(..., max_length=255)
     capacity: int = Field(..., le=150)
     capacity_exam: int = Field(..., le=30)
-    active: bool
     characteristic_name: str = Field(..., max_length=150)
     building_identifier: str = Field(..., max_length=50)
 
@@ -18,7 +17,7 @@ class RoomGet(BaseModel):
     location: str = Field(..., max_length=255)
     capacity: int = Field(..., le=150)
     capacity_exam: int = Field(..., le=30)
-    active: bool
+    isFree: bool
     characteristic_name: str = Field(..., max_length=150)
     building_identifier: str = Field(..., max_length=50)
     created_at: datetime
@@ -29,7 +28,6 @@ class RoomUpdate(BaseModel):
     location: Optional[str] = Field(None, max_length=255)
     capacity: Optional[int] = Field(None, le=150)
     capacity_exam: Optional[int] = Field(None, le=30)
-    active: Optional[bool] = None
     characteristic_name: Optional[str] = Field(None, max_length=150)
     building_identifier: Optional[str] = Field(None, max_length=50)
 

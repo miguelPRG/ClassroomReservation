@@ -18,7 +18,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="flex justify-end">
-              <Button onClick={() => navigate("/rooms/new")} className="mb-4">
+              <Button onClick={() => navigate(`/room-edit/${null}`)} className="mb-4">
                 Adicionar Sala
               </Button>
             </div>

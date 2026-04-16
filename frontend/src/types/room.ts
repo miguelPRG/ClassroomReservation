@@ -1,11 +1,10 @@
-export type CreateRoomPayload = {
-  name: string;
-  location: string;
-  capacity: number;
-  capacity_exam: number;
-  active: boolean;
-  characteristic_name: string;
-  building_identifier: string;
+export type RoomPayload = {
+  name?: string;
+  location?: string;
+  capacity?: number;
+  capacity_exam?: number;
+  characteristic_name?: string;
+  building_identifier?: string;
 }
 
 export type Room = {
@@ -14,19 +13,9 @@ export type Room = {
   location: string;
   capacity: number;
   capacity_exam: number;
-  active: boolean;
+  isFree  : boolean;
   characteristic_name: string;
   building_identifier: string;
   created_at: string;
   updated_at: string;
-}
-
-export type UpdateRoomPayload = {
-  name?: string;
-  location?: string;
-  capacity?: number;
-  capacity_exam?: number;
-  active?: boolean;
-  characteristic_name?: string;
-  building_identifier?: string;
 }

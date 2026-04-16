@@ -37,7 +37,7 @@ export function LoginPage() {
     <main className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-8 px-4 py-8 md:grid-cols-2">
       <section className="hidden space-y-4 md:block">
         <p className="inline-flex rounded-full border border-border/70 bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
-          WebServices Platform
+          Roomate
         </p>
         <h1 className="text-4xl font-semibold leading-tight">
           Gestão simples do teu sistema, num único painel.
