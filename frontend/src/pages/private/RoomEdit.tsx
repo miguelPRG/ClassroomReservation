@@ -45,7 +45,7 @@ export function RoomEditPage() {
 
   return (
     <div className="py-8">
-      <RoomForm room={room} onSubmit={handleSubmit} isLoading={isLoading} />
+      <RoomForm room={room} onSubmit={handleSubmit} isLoading={isLoading} onCancel={() => navigate(-1)} />
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function DashboardPage() {
         <CardContent>
           <div className="flex justify-end">
             <Button
-              onClick={() => navigate(`/room-edit/${null}`)}
+              onClick={() => navigate(`/room-edit`)}
               className="mb-4"
             >
               Adicionar Sala
