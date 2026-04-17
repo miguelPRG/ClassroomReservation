@@ -9,6 +9,7 @@ def _generate_secret() -> str:
     key = base64.urlsafe_b64encode(secrets.token_bytes(64)).decode().rstrip("=")
     print("Guarda esta chave de segurança no .env: ", key)
 
+
 # Em produção, defina JWT_SECRET_KEY no .env
 SECRET_KEY = os.getenv("JWT_SECRET_KEY") or _generate_secret()
 ALGORITHM = "HS512"

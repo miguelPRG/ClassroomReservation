@@ -1,13 +1,13 @@
-import { useLogout } from "@/hooks/use-auth"
-import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
+import { useLogout } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 export function Header() {
-  const logout = useLogout()
+  const logout = useLogout();
 
   const handleLogout = () => {
-    logout()
-  }
+    logout();
+  };
 
   return (
     <header className="fixed top-0 p-5 w-full bg-primary mb-15 h-20">
@@ -31,5 +31,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

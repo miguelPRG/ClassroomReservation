@@ -1,16 +1,16 @@
 export type AuthUser = {
-  id: string
-  nome: string
-  email: string
-}
+  id: string;
+  nome: string;
+  email: string;
+};
 
 export type LoginPayload = {
-  email: string
-  password: string
-}
+  email: string;
+  password: string;
+};
 
 export type RegisterPayload = {
-  nome: string
-  email: string
-  password: string
-}
+  nome: string;
+  email: string;
+  password: string;
+};

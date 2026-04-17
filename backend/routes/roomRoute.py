@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException
-from datetime import datetime
+from fastapi import APIRouter, HTTPException, Request
 from bson import ObjectId
 from models.roomModel import RoomCreate, RoomGet, RoomUpdate, RoomMessage
 import database
+
 roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
 
 
@@ -16,14 +16,14 @@ roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
         500: {"description": "Erro ao criar sala"},
     },
 )
-async def create_room(room: RoomCreate):
+async def create_room(room: RoomCreate, request: Request):
     """
     Cria uma nova sala com oPartial<CreateRoomPayload>) =>s detalhes fornecidos de RoomCreate
     """
     room_dict = room.model_dump()
     room_dict["isFree"] = True
-    room_dict["created_at"] = datetime.now()
-    room_dict["updated_at"] = datetime.now()
+    room_dict["created_at"] = request.state.now
+    room_dict["updated_at"] = request.state.now
 
     try:
         result = await database.sala_collection.insert_one(room_dict)
@@ -31,6 +31,7 @@ async def create_room(room: RoomCreate):
         raise HTTPException(status_code=500, detail=f"Erro ao criar sala: {str(e)}")
 
     return {"message": "Sala criada com sucesso", "id": str(result.inserted_id)}
+
 
 # 🔹 Listar todas as salas
 @roomRouter.get(
@@ -91,16 +92,16 @@ async def get_room(room_id: str):
         404: {"description": "Sala não encontrada"},
     },
 )
-async def update_room(room_id: str, room: RoomUpdate):
+async def update_room(room_id: str, room: RoomUpdate, request: Request):
     """
-        Atualiza os detalhes de uma sala existente com base no ID fornecido e nos dados de atualização de RoomUpdate
+    Atualiza os detalhes de uma sala existente com base no ID fornecido e nos dados de atualização de RoomUpdate
     """
-    
+
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID inválido")
 
     update_data = room.model_dump()
-    update_data["updated_at"] = datetime.now()
+    update_data["updated_at"] = request.state.now
 
     result = await database.sala_collection.update_one(
         {"_id": ObjectId(room_id)}, {"$set": update_data}
@@ -124,7 +125,7 @@ async def update_room(room_id: str, room: RoomUpdate):
 )
 async def delete_room(room_id: str):
     """
-        Deleta uma sala específica com base no ID fornecido
+    Deleta uma sala específica com base no ID fornecido
     """
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID inválido")

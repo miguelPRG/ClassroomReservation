@@ -1,11 +1,17 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Link } from "react-router-dom"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { useRegister } from "@/hooks/use-auth"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useRegister } from "@/hooks/use-auth";
 
 const schema = z
   .object({
@@ -17,12 +23,12 @@ const schema = z
   .refine((values) => values.password === values.confirmPassword, {
     path: ["confirmPassword"],
     message: "As passwords não coincidem.",
-  })
+  });
 
-type RegisterFormValues = z.infer<typeof schema>
+type RegisterFormValues = z.infer<typeof schema>;
 
 export function RegisterPage() {
-  const registerMutation = useRegister()
+  const registerMutation = useRegister();
 
   const {
     register,
@@ -36,15 +42,15 @@ export function RegisterPage() {
       password: "",
       confirmPassword: "",
     },
-  })
+  });
 
   const onSubmit = async (values: RegisterFormValues) => {
     await registerMutation.mutateAsync({
       nome: values.name,
       email: values.email,
       password: values.password,
-    })
-  }
+    });
+  };
 
   return (
     <main className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-8 px-4 py-8 md:grid-cols-2">
@@ -56,7 +62,8 @@ export function RegisterPage() {
           Cria o teu acesso e começa em menos de 1 minuto.
         </h1>
         <p className="max-w-md text-base text-muted-foreground">
-          Preenche os dados, validação em tempo real e experiência otimizada para desktop e mobile.
+          Preenche os dados, validação em tempo real e experiência otimizada
+          para desktop e mobile.
         </p>
       </section>
 
@@ -68,31 +75,65 @@ export function RegisterPage() {
         <CardContent className="space-y-5">
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/90" htmlFor="name">
+              <label
+                className="text-sm font-medium text-foreground/90"
+                htmlFor="name"
+              >
                 Nome
               </label>
               <Input id="name" placeholder="Miguel" {...register("name")} />
-              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-xs text-destructive">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/90" htmlFor="email">
+              <label
+                className="text-sm font-medium text-foreground/90"
+                htmlFor="email"
+              >
                 Email
               </label>
-              <Input id="email" type="email" placeholder="email@dominio.com" {...register("email")} />
-              {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+              <Input
+                id="email"
+                type="email"
+                placeholder="email@dominio.com"
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/90" htmlFor="password">
+              <label
+                className="text-sm font-medium text-foreground/90"
+                htmlFor="password"
+              >
                 Password
               </label>
-              <Input id="password" type="password" placeholder="********" {...register("password")} />
-              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+              <Input
+                id="password"
+                type="password"
+                placeholder="********"
+                {...register("password")}
+              />
+              {errors.password && (
+                <p className="text-xs text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/90" htmlFor="confirmPassword">
+              <label
+                className="text-sm font-medium text-foreground/90"
+                htmlFor="confirmPassword"
+              >
                 Confirmar password
               </label>
               <Input
@@ -102,23 +143,32 @@ export function RegisterPage() {
                 {...register("confirmPassword")}
               />
               {errors.confirmPassword && (
-                <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
-            <Button className="w-full text-sm font-semibold" type="submit" disabled={registerMutation.isPending}>
+            <Button
+              className="w-full text-sm font-semibold"
+              type="submit"
+              disabled={registerMutation.isPending}
+            >
               {registerMutation.isPending ? "A criar conta..." : "Registar"}
             </Button>
           </form>
 
           <p className="text-sm text-muted-foreground">
             Já tem conta?{" "}
-            <Link className="font-medium text-primary hover:underline" to="/login">
+            <Link
+              className="font-medium text-primary hover:underline"
+              to="/login"
+            >
               Iniciar sessão
             </Link>
           </p>
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }

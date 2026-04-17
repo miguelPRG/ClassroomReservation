@@ -1,9 +1,9 @@
-import { createColumnHelper } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
-import type { Room } from "@/types/room"
+import { createColumnHelper } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import type { Room } from "@/types/room";
 
-const columnHelper = createColumnHelper<Room>()
+const columnHelper = createColumnHelper<Room>();
 
 export const roomColumns = [
   columnHelper.accessor("name", {
@@ -31,11 +31,13 @@ export const roomColumns = [
     header: "Status",
     cell: (info) => (
       <div className="flex justify-center">
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          info.getValue()
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}>
+        <span
+          className={`px-2 py-1 rounded text-xs font-medium ${
+            info.getValue()
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
           {info.getValue() ? "Livre" : "Ocupada"}
         </span>
       </div>
@@ -53,4 +55,4 @@ export const roomColumns = [
       </div>
     ),
   }),
-]
+];

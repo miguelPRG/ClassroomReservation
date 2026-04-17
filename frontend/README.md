@@ -1,6 +1,7 @@
 # Frontend SPA
 
 SPA em React + Vite com:
+
 - autenticação (login + registo)
 - rotas públicas e privadas com `react-router-dom`
 - formulários com `react-hook-form` + `zod`

@@ -1,9 +1,12 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const roomFormSchema = z
   .object({
     name: z.string().min(1, "Nome é obrigatório").max(255, "Nome muito longo"),
-    location: z.string().min(1, "Localização é obrigatória").max(255, "Localização muito longa"),
+    location: z
+      .string()
+      .min(1, "Localização é obrigatória")
+      .max(255, "Localização muito longa"),
     capacity: z.coerce
       .number()
       .int("Capacidade deve ser um número inteiro")
@@ -26,6 +29,6 @@ export const roomFormSchema = z
   .refine((data) => data.capacity_exam <= data.capacity, {
     message: "Capacidade de exame não pode ser maior que a capacidade normal",
     path: ["capacity_exam"],
-  })
+  });
 
-export type RoomFormData = z.infer<typeof roomFormSchema>
+export type RoomFormData = z.infer<typeof roomFormSchema>;

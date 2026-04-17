@@ -1,5 +1,9 @@
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
-import type { ColumnDef } from "@tanstack/react-table"
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -7,11 +11,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 interface DataTableProps<TData> {
-  columns: ColumnDef<TData, any>[]
-  data: TData[]
+  columns: ColumnDef<TData, unknown>[];
+  data: TData[];
 }
 
 export default function DataTable<TData>({
@@ -22,7 +26,7 @@ export default function DataTable<TData>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
+  });
 
   return (
     <div className="overflow-hidden rounded-md border">
@@ -32,7 +36,12 @@ export default function DataTable<TData>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}>
-                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                 </TableHead>
               ))}
             </TableRow>
@@ -59,5 +68,5 @@ export default function DataTable<TData>({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

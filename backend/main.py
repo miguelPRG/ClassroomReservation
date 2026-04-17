@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from database import init_database
+from datetime import datetime
 from routes.userRoute import userRouter
 from routes.reservaRoute import reservaRouter
 from routes.roomRoute import roomRouter
@@ -74,10 +75,10 @@ async def middleware(request: Request, call_next):
 
     if origin not in ALLOW_ORIGINS:
         logger.warning(f"Origem não permitida: {origin}")
-        return JSONResponse(
-            status_code=403,
-            content={"detail": "Origem não permitida"}
-        )
+        return JSONResponse(status_code=403, content={"detail": "Origem não permitida"})
+
+    # Adicionar datetime ao request state
+    request.state.now = datetime.now()
 
     path = request.url.path
 
@@ -91,29 +92,20 @@ async def middleware(request: Request, call_next):
     token = request.cookies.get("token")
     if not token:
         logger.warning(f"Token não fornecido para rota protegida: {path}")
-        return JSONResponse(
-            status_code=401,
-            content={"detail": "Não autenticado"}
-        )
+        return JSONResponse(status_code=401, content={"detail": "Não autenticado"})
 
     try:
         payload = validate_jwt(token)
         if not payload:
             logger.warning(f"Token inválido para rota: {path}")
-            return JSONResponse(
-                status_code=401,
-                content={"detail": "Token inválido"}
-            )
+            return JSONResponse(status_code=401, content={"detail": "Token inválido"})
         request.state.user = payload
         logger.debug(
             f"Token validado com sucesso para utilizador: {payload.get('sub')}"
         )
     except Exception as e:
         logger.error(f"Erro na validação de token: {str(e)}")
-        return JSONResponse(
-            status_code=401,
-            content={"detail": "Token inválido"}
-        )
+        return JSONResponse(status_code=401, content={"detail": "Token inválido"})
 
     response = await call_next(request)
     logger.info(f"Response: {path} - Status {response.status_code}")

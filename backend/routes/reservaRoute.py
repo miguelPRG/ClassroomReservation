@@ -3,7 +3,6 @@ from pymongo.errors import DuplicateKeyError
 from models.reservaModel import ReservationCreate
 from database import user_collection, sala_collection, user_sala_collection
 from bson import ObjectId
-from datetime import datetime
 from asyncio import gather
 
 reservaRouter = APIRouter(prefix="/reservation", tags=["Reservation"])
@@ -64,13 +63,11 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
             detail="Já existe uma reserva para esta sala neste intervalo de tempo",
         )
 
-    data = datetime.now()
-
     reservation_dict = reservation.model_dump()
     reservation_dict["created_by"] = user_id
-    reservation_dict["created_at"] = data
+    reservation_dict["created_at"] = request.state.now
     reservation_dict["updated_by"] = user_id
-    reservation_dict["updated_at"] = data
+    reservation_dict["updated_at"] = request.state.now
 
     try:
         await user_sala_collection.insert_one(reservation_dict)

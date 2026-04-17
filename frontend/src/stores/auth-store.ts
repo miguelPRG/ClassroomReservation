@@ -1,11 +1,11 @@
-import { create } from "zustand"
-import { devtools } from "zustand/middleware"
-import type { AuthUser } from "@/types/auth"
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import type { AuthUser } from "@/types/auth";
 
 type AuthState = {
-  user: AuthUser | null
-  setUser: (user: AuthUser | null) => void
-}
+  user: AuthUser | null;
+  setUser: (user: AuthUser | null) => void;
+};
 
 export const useAuthStore = create<AuthState>()(
   devtools(
@@ -15,6 +15,6 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "AuthStore",
-    }
-  )
-)
+    },
+  ),
+);

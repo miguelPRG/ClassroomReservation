@@ -5,7 +5,7 @@ export type RoomPayload = {
   capacity_exam?: number;
   characteristic_name?: string;
   building_identifier?: string;
-}
+};
 
 export type Room = {
   id: string;
@@ -13,9 +13,9 @@ export type Room = {
   location: string;
   capacity: number;
   capacity_exam: number;
-  isFree  : boolean;
+  isFree: boolean;
   characteristic_name: string;
   building_identifier: string;
   created_at: string;
   updated_at: string;
-}
+};

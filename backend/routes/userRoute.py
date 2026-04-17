@@ -5,7 +5,6 @@ from models.userModel import UserCreate, UserLogin, UserLogout, UserGet
 import database
 from bson import ObjectId
 from pwdlib import PasswordHash
-from datetime import datetime
 from controller.jwtValidation import generate_jwt
 
 userRouter = APIRouter(prefix="/user", tags=["User"])
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
         500: {"description": "Erro ao criar utilizador"},
     },
 )
-async def create_user(user: UserCreate):
+async def create_user(user: UserCreate, request: Request):
     """
     Cria um novo utilizador. Verifica se o email já existe, e se não existir, insere o novo utilizador na base de dados com a password hashada e as datas de criação e atualização.
     """
@@ -38,9 +37,8 @@ async def create_user(user: UserCreate):
     user_dict = user.model_dump()
     user_dict["password"] = password_hash.hash(user.password)
     user_dict["role"] = "user"
-    data = datetime.now()
-    user_dict["created_at"] = data
-    user_dict["updated_at"] = data
+    user_dict["created_at"] = request.state.now
+    user_dict["updated_at"] = request.state.now
     user_dict["last_login"] = None
 
     try:
@@ -54,13 +52,15 @@ async def create_user(user: UserCreate):
 
     jwt_token = generate_jwt(str(new_user_id))
 
-    response = JSONResponse(content={
-        UserGet(
-            id=str(new_user_id),
-            nome=user.nome,
-            email=user.email,
-        ).model_dump()
-    })
+    response = JSONResponse(
+        content={
+            UserGet(
+                id=str(new_user_id),
+                nome=user.nome,
+                email=user.email,
+            ).model_dump()
+        }
+    )
     response.set_cookie(
         key="token",
         value=jwt_token,
@@ -80,7 +80,7 @@ async def create_user(user: UserCreate):
         400: {"description": "Email ou password inválidos"},
     },
 )
-async def login_user(user: UserLogin):
+async def login_user(user: UserLogin, request: Request):
     """Autentica um utilizador. Verifica se o email existe e se a password é correta. Se a autenticação for bem-sucedida, gera um token JWT, atualiza a data do último login e retorna uma resposta com o token definido como cookie."""
 
     existing_user = await database.user_collection.find_one({"email": user.email})
@@ -94,11 +94,11 @@ async def login_user(user: UserLogin):
     jwt_token = generate_jwt(str(existing_user["_id"]))
 
     await database.user_collection.update_one(
-        {"_id": existing_user["_id"]}, {"$set": {"last_login": datetime.now()}}
+        {"_id": existing_user["_id"]}, {"$set": {"last_login": request.state.now}}
     )
 
-    response = JSONResponse(content=
-        UserGet(
+    response = JSONResponse(
+        content=UserGet(
             id=str(existing_user["_id"]),
             nome=existing_user.get("nome"),
             email=existing_user.get("email"),
@@ -120,7 +120,7 @@ async def login_user(user: UserLogin):
 
 
 @userRouter.post(
-    "/logout", 
+    "/logout",
     summary="Logout do utilizador",
     response_model=UserLogout,
 )

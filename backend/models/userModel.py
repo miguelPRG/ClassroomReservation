@@ -28,9 +28,11 @@ class UserLogin(BaseModel):
     email: EmailStr = Field(..., max_length=150)
     password: str = Field(..., min_length=10, max_length=150)
 
+
 class UserLogout(BaseModel):
     message: str = "Logout bem-sucedido"
-    
+
+
 class UserGet(BaseModel):
     id: str
     nome: str

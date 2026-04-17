@@ -1,4 +1,4 @@
-import { Loader } from "lucide-react"
+import { Loader } from "lucide-react";
 
 export function Loading() {
   return (
@@ -8,5 +8,5 @@ export function Loading() {
         <p className="text-muted-foreground">Carregando...</p>
       </div>
     </div>
-  )
+  );
 }
