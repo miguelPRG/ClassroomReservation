@@ -22,10 +22,11 @@ export function useRoomCreate() {
   });
 }
 
-export function useRoomQuery(roomID: string | null = null) {
+export function useRoomQuery(roomID: string | null = null, ativar = true) {
   return useQuery({
     queryKey: ["rooms", roomID],
     queryFn: () => roomApi.get(roomID),
+    enabled: ativar,
   });
 }
 

@@ -3,6 +3,9 @@ from datetime import datetime
 
 
 class ReservationCreate(BaseModel):
+    """
+    Modelo para criação de uma reserva. Inclui validação do status da reserva.
+    """
     user_id: str = Field(
         ..., pattern="^[0-9a-fA-F]{24}$", example="64b8c9f1e4b0a5d6c7e8f9a"
     )

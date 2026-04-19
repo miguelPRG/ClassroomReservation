@@ -50,7 +50,7 @@ async def create_user(user: UserCreate, request: Request):
             status_code=500, detail=f"Erro ao criar utilizador: {str(e)}"
         )
 
-    jwt_token = generate_jwt(str(new_user_id))
+    jwt_token = generate_jwt(str(new_user_id), user_dict["role"])
 
     response = JSONResponse(
         content={
@@ -91,7 +91,7 @@ async def login_user(user: UserLogin, request: Request):
         logger.warning(f"Falha de login para email: {user.email}")
         raise HTTPException(status_code=400, detail="Email ou password inválidos")
 
-    jwt_token = generate_jwt(str(existing_user["_id"]))
+    jwt_token = generate_jwt(str(existing_user["_id"]), existing_user["role"])
 
     await database.user_collection.update_one(
         {"_id": existing_user["_id"]}, {"$set": {"last_login": request.state.now}}

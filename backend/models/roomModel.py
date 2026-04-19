@@ -4,6 +4,9 @@ from typing import Optional
 
 
 class RoomCreate(BaseModel):
+    """
+    Modelo para criação de uma sala de aula.
+    """
     name: str = Field(..., max_length=255)
     location: str = Field(..., max_length=255)
     capacity: int = Field(..., le=150)
@@ -12,7 +15,7 @@ class RoomCreate(BaseModel):
     building_identifier: str = Field(..., max_length=50)
 
 
-class RoomGet(BaseModel):
+class Room(BaseModel):
     id: str
     name: str = Field(..., max_length=255)
     location: str = Field(..., max_length=255)

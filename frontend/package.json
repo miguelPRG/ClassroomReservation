@@ -11,6 +11,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@base-ui/react": "^1.4.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/roboto-slab": "^5.2.8",
     "@fontsource-variable/space-grotesk": "^5.2.10",

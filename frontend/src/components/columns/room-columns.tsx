@@ -1,9 +1,56 @@
 import { createColumnHelper } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { Room } from "@/types/room";
+import { useRoomDelete } from "@/hooks/use-rooms";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 
 const columnHelper = createColumnHelper<Room>();
+
+function ActionsCell({ room }: { room: Room }) {
+  const navigate = useNavigate();
+  const deleteRoom = useRoomDelete();
+
+  const handleEdit = () => {
+    navigate(`/room-edit/${room.id}`);
+  };
+
+  const handleDelete = () => {
+    deleteRoom.mutate(room.id);
+  };
+
+  return (
+    <div className="flex justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Abrir menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleEdit}>
+            Editar
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={handleDelete}
+            className="text-red-600"
+          >
+            Apagar
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
 
 export const roomColumns = [
   columnHelper.accessor("name", {
@@ -46,13 +93,6 @@ export const roomColumns = [
   columnHelper.display({
     id: "actions",
     header: "Ações",
-    cell: () => (
-      <div className="flex justify-center">
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Abrir menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </div>
-    ),
+    cell: ({ row }) => <ActionsCell room={row.original} />,
   }),
-];
+] as ColumnDef<Room>[];

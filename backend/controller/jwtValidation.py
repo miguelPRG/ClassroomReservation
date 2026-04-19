@@ -16,7 +16,7 @@ ALGORITHM = "HS512"
 EXPIRATION_HOURS = 1
 
 
-def generate_jwt(user_id: str, role: str = "user") -> str:
+def generate_jwt(user_id: str, role: str) -> str:
     now = datetime.now(timezone.utc)
     exp = now + timedelta(hours=EXPIRATION_HOURS)
 

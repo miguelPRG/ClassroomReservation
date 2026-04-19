@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from bson import ObjectId
-from models.roomModel import RoomCreate, RoomGet, RoomUpdate, RoomMessage
+from models.roomModel import RoomCreate, Room, RoomUpdate, RoomMessage
 import database
 
 roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
@@ -18,7 +18,7 @@ roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
 )
 async def create_room(room: RoomCreate, request: Request):
     """
-    Cria uma nova sala com oPartial<CreateRoomPayload>) =>s detalhes fornecidos de RoomCreate
+    Cria uma nova sala com oPartial<CreateRoomPayload>) => detalhes fornecidos de RoomCreate
     """
     room_dict = room.model_dump()
     room_dict["isFree"] = True
@@ -37,7 +37,7 @@ async def create_room(room: RoomCreate, request: Request):
 @roomRouter.get(
     "/",
     summary="Listar todas as salas",
-    response_model=list[RoomGet],
+    response_model=list[Room],
     responses={
         500: {"description": "Erro ao listar salas"},
     },
@@ -60,7 +60,7 @@ async def list_all_rooms(skip: int = 0):
 @roomRouter.get(
     "/{room_id}",
     summary="Obter uma sala por ID",
-    response_model=list[RoomGet],
+    response_model=list[Room],
     responses={
         400: {"description": "ID de sala inválido"},
         404: {"description": "Sala não encontrada"},

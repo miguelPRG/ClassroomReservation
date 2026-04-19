@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 
 interface RoomFormProps {
-  room?: Room;
+  room?: Room | null;
   onSubmit: (data: RoomFormData) => void;
   isLoading?: boolean;
   onCancel: () => void;
@@ -59,7 +59,6 @@ export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFo
           <Input
             {...register("name")}
             id="name"
-            placeholder="Ex: Sala 101"
             className={errors.name ? "border-red-500" : ""}
           />
           {errors.name && (
@@ -78,7 +77,6 @@ export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFo
           <Input
             {...register("location")}
             id="location"
-            placeholder="Ex: Bloco A - 1º andar"
             className={errors.location ? "border-red-500" : ""}
           />
           {errors.location && (
@@ -99,7 +97,6 @@ export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFo
           <Input
             {...register("building_identifier")}
             id="building_identifier"
-            placeholder="Ex: A"
             className={errors.building_identifier ? "border-red-500" : ""}
           />
           {errors.building_identifier && (
@@ -120,7 +117,6 @@ export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFo
           <Input
             {...register("characteristic_name")}
             id="characteristic_name"
-            placeholder="Ex: Laboratório, Auditório, Sala de Aula"
             className={errors.characteristic_name ? "border-red-500" : ""}
           />
           {errors.characteristic_name && (
@@ -143,7 +139,6 @@ export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFo
               {...register("capacity")}
               id="capacity"
               type="number"
-              placeholder="Ex: 40"
               className={errors.capacity ? "border-red-500" : ""}
             />
             {errors.capacity && (
@@ -164,7 +159,6 @@ export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFo
               {...register("capacity_exam")}
               id="capacity_exam"
               type="number"
-              placeholder="Ex: 20"
               className={errors.capacity_exam ? "border-red-500" : ""}
             />
             {errors.capacity_exam && (
