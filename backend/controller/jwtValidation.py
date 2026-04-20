@@ -13,7 +13,7 @@ def _generate_secret() -> str:
 # Em produção, defina JWT_SECRET_KEY no .env
 SECRET_KEY = os.getenv("JWT_SECRET_KEY") or _generate_secret()
 ALGORITHM = "HS512"
-EXPIRATION_HOURS = 1
+EXPIRATION_HOURS = 24
 
 
 def generate_jwt(user_id: str, role: str) -> str:

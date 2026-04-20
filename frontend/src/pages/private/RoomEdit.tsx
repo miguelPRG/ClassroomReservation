@@ -7,11 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Room } from "@/types/room";
 
 export function RoomEditPage() {
-  const { id } = useParams<{ id?: string }>();
+  const { id } = useParams<{ id: string  }>();
   const navigate = useNavigate();
 
   // Query para carregar dados da sala específica (desabilitada em modo criação)
-  const { data: queryData, isLoading: isQueryLoading } = useRoomQuery(id, !!id);
+  const { data: queryData, isLoading: isQueryLoading } = useRoomQuery({ativar: !!id, roomID: id});
   
   console.log("ID da sala:", id);
 

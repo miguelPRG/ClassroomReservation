@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from database import init_database
 from datetime import datetime
 from routes.userRoute import userRouter
-from routes.reservaRoute import reservaRouter
+#from routes.reservaRoute import reservaRouter
 from routes.roomRoute import roomRouter
 from controller.jwtValidation import validate_jwt
 
@@ -113,7 +113,7 @@ async def middleware(request: Request, call_next):
 
 
 app.include_router(userRouter)
-app.include_router(reservaRouter)
+#app.include_router(reservaRouter)
 app.include_router(roomRouter)
 
 

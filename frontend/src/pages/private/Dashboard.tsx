@@ -5,11 +5,14 @@ import DataTable from "@/components/DataTable";
 import { roomColumns } from "@/components/columns/room-columns";
 import { useRoomQuery } from "@/hooks/use-rooms";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { data, isLoading, error } = useRoomQuery();
+  const [page, setPage] = useState(0);
 
+  const { data, isLoading, error } = useRoomQuery({ page });
+  
   return (
     <>
       <Card className="h-150 w-300 mx-auto">
@@ -42,6 +45,20 @@ export function DashboardPage() {
               <p className="text-muted-foreground">Nenhuma sala disponível</p>
             </div>
           )}
+          <div className="flex justify-between mt-4">
+            <Button
+              onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+              disabled={page === 0}
+            >
+              Anterior
+            </Button>
+            <Button
+              onClick={() => setPage((prev) => prev + 1)}
+              disabled={data ? data.length < 3 : true} // Desabilita se menos de 3 salas forem retornadas (última página)
+            >
+              Próxima
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </>

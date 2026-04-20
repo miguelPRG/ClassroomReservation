@@ -58,18 +58,18 @@ async def create_room(room: RoomCreate, request: Request):
         500: {"description": "Erro ao listar salas"},
     },
 )
-async def list_all_rooms(skip: int = 0, request: Request = None):
+async def list_all_rooms(page: int = 0, request: Request = None):
     """
     Retorna todas as salas com paginação.
     Calcula o status isFree via aggregation pipeline: verifica se existe alguma reserva ativa no intervalo de tempo atual.
     Uma sala é FREE se NÃO houver nenhuma reserva onde start_date <= now <= end_date
     """
-    limit = 10
+    limit = 3
     
     # Define o pipeline de agregação complexo
     pipeline = [
         # 🔹 Aplica paginação: pula N salas e limita o resultado a 10
-        {"$skip": skip},
+        {"$skip": page * limit},
         {"$limit": limit},
         
         # 🔹 LEFT JOIN com a coleção user_sala para buscar reservas ativas

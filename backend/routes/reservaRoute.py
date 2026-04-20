@@ -7,7 +7,7 @@ reservaRouter = APIRouter(prefix="/reservation", tags=["Reservation"])
 
 
 @reservaRouter.post(
-    "/create",
+    "/",
     summary="Criar uma nova reserva",
     responses={
         404: {"description": "Utilizador ou Sala não encontrado"},
@@ -116,3 +116,4 @@ async def get_reservation(reservation_id: str = None):
     del reservation["_id"]
     return Reservation(**reservation)
 
+async def 

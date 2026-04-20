@@ -6,7 +6,7 @@ import database
 from bson import ObjectId
 from pwdlib import PasswordHash
 from controller.jwtValidation import generate_jwt
-from pymongo import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError
 
 userRouter = APIRouter(prefix="/user", tags=["User"])
 password_hash = PasswordHash.recommended()

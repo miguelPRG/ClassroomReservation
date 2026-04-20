@@ -32,11 +32,11 @@ async function request<T>(
 
     try {
       const body = await response.json();
-      if (typeof body?.message === "string") {
-        message = body.message;
+      if (typeof body?.detail === "string") {
+        message = body.detail;
       }
     } catch {
-      // Ignore parse errors and keep fallback message.
+      // Se não conseguir fazer parse do JSON, usa fallback
     }
 
     throw new ApiError(message, response.status);
@@ -52,7 +52,7 @@ export const authApi = {
       body: JSON.stringify(payload),
     }),
   register: (payload: RegisterPayload) =>
-    request<AuthUser>("/user/register", {
+    request("/user/register", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
@@ -69,10 +69,20 @@ export const roomApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  get: (roomID: string | null = null) =>
-    request<Room[]>(`/room${roomID ? `/${roomID}` : ""}`, {
-      method: "GET",
-    }),
+  list: (page?: number | null) =>
+    request<Room[]>(
+      `/room${page !== undefined && page !== null ? `?page=${page}` : ""}`,
+      {
+        method: "GET",
+      }
+    ),
+  getById: (roomID: string) =>
+    request<Room[]>(
+      `/room/${roomID}`,
+      {
+        method: "GET",
+      }
+    ),
   put: (roomID: string, payload: RoomPayload) =>
     request(`/room/${roomID}`, {
       method: "PUT",
@@ -83,3 +93,16 @@ export const roomApi = {
       method: "DELETE",
     }),
 };
+
+export const reservaApi = {
+  create: (payload: any) =>
+    request("/reserva", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  get: (reservaID: string | null = null) =>
+    request(`/reserva${reservaID ? `/${reservaID}` : ""}`, {
+      method: "GET",
+    }),
+  //delete: (reservaID: string) =>
+}

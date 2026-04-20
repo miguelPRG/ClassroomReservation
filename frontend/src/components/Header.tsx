@@ -17,14 +17,6 @@ export function Header() {
         <div className="flex items-center">
           <h1 className="text-2xl font-bold hover:cursor-pointer" onClick={() => navigate("/") }>RoomMate</h1>
         </div>
-        <nav className="flex space-x-4 list-none">
-          <li onClick={() => navigate("/rooms")}>
-            Rooms
-          </li>
-          <li onClick={() => navigate("/reservas")}>
-            Reservas
-          </li>
-        </nav>
 
         {/* Logout Button */}
         <div>
