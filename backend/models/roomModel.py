@@ -16,6 +16,9 @@ class RoomCreate(BaseModel):
 
 
 class Room(BaseModel):
+    """
+    Modelo para representação de uma sala de aula, incluindo o ID e as datas de criação e atualização.
+    """
     id: str
     name: str = Field(..., max_length=255)
     location: str = Field(..., max_length=255)
@@ -29,6 +32,9 @@ class Room(BaseModel):
 
 
 class RoomUpdate(BaseModel):
+    """
+    Modelo para atualização de uma sala de aula. Todos os campos são opcionais, permitindo atualizações parciais.
+    """
     name: Optional[str] = Field(None, max_length=255)
     location: Optional[str] = Field(None, max_length=255)
     capacity: Optional[int] = Field(None, le=150)
@@ -38,4 +44,7 @@ class RoomUpdate(BaseModel):
 
 
 class RoomMessage(BaseModel):
+    """
+    Modelo para mensagens de resposta relacionadas a operações de sala, como criação ou atualização.
+    """
     message: str

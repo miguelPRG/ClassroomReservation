@@ -12,4 +12,4 @@ export const appRouter = createBrowserRouter([
       element: <ProtectedRoute />,
     },
   ]),
-]) as const;
+]);

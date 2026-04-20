@@ -1,11 +1,12 @@
 import logging
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from models.userModel import UserCreate, UserLogin, UserLogout, UserGet
+from models.userModel import UserCreate, UserLogin, UserLogout, User
 import database
 from bson import ObjectId
 from pwdlib import PasswordHash
 from controller.jwtValidation import generate_jwt
+from pymongo import DuplicateKeyError
 
 userRouter = APIRouter(prefix="/user", tags=["User"])
 password_hash = PasswordHash.recommended()
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 @userRouter.post(
     "/register",
     summary="Criar um novo utilizador",
-    response_model=UserGet,
+    response_model=User,
     responses={
         400: {"description": "Utilizador já existe"},
         500: {"description": "Erro ao criar utilizador"},
@@ -44,6 +45,9 @@ async def create_user(user: UserCreate, request: Request):
     try:
         new_user = await database.user_collection.insert_one(user_dict)
         new_user_id = new_user.inserted_id
+    except DuplicateKeyError:
+        logger.warning(f"Email já existente: {user.email}")
+        raise HTTPException(status_code=400, detail="Já existe um utilizador com esse email")
     except Exception as e:
         logger.error(f"Erro ao criar utilizador {user.email}: {str(e)}", exc_info=True)
         raise HTTPException(
@@ -54,7 +58,7 @@ async def create_user(user: UserCreate, request: Request):
 
     response = JSONResponse(
         content={
-            UserGet(
+            User(
                 id=str(new_user_id),
                 nome=user.nome,
                 email=user.email,
@@ -75,7 +79,7 @@ async def create_user(user: UserCreate, request: Request):
 @userRouter.post(
     "/login",
     summary="Autenticar um utilizador",
-    response_model=UserGet,
+    response_model=User,
     responses={
         400: {"description": "Email ou password inválidos"},
     },
@@ -98,7 +102,7 @@ async def login_user(user: UserLogin, request: Request):
     )
 
     response = JSONResponse(
-        content=UserGet(
+        content=User(
             id=str(existing_user["_id"]),
             nome=existing_user.get("nome"),
             email=existing_user.get("email"),
@@ -136,7 +140,7 @@ async def logout_user():
 @userRouter.get(
     "/me",
     summary="Ler informações do utilizador autenticado",
-    response_model=UserGet,
+    response_model=User,
     responses={
         401: {"description": "Utilizador não encontrado"},
     },
@@ -160,7 +164,7 @@ async def auth_user(request: Request):
         response.delete_cookie(key="token")
         return response
 
-    return UserGet(
+    return User(
         id=str(user["_id"]),
         nome=user.get("nome"),
         email=user.get("email"),

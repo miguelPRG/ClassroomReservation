@@ -14,7 +14,6 @@ class ReservationCreate(BaseModel):
     )
     start_datetime: datetime
     end_datetime: datetime
-    status: str
 
     @field_validator("status")
     @classmethod
@@ -25,3 +24,23 @@ class ReservationCreate(BaseModel):
                 f"Status inválido. Deve ser um dos seguintes: {', '.join(valid_statuses)}"
             )
         return value
+
+class Reservation(BaseModel):
+    """
+    Modelo para uma reserva completa, incluindo campos de auditoria.
+    """
+    id: str = Field(..., alias="_id")
+    user_id: str
+    room_id: str
+    start_datetime: datetime
+    end_datetime: datetime
+    created_by: str
+    created_at: datetime
+    updated_by: str
+    updated_at: datetime
+
+class ReservationMessage(BaseModel):
+    """
+    Modelo para mensagens de resposta relacionadas a operações de reserva, como criação ou atualização.
+    """
+    message: str

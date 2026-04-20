@@ -41,7 +41,7 @@ class UserLogout(BaseModel):
     message: str = "Logout bem-sucedido"
 
 
-class UserGet(BaseModel):
+class User(BaseModel):
     """
     Modelo para retorno de informações de um utilizador. Inclui o ID, nome e email.
     """
