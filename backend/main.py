@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from database import init_database
 from datetime import datetime
 from routes.userRoute import userRouter
-#from routes.reservaRoute import reservaRouter
+from routes.reservaRoute import reservaRouter
 from routes.roomRoute import roomRouter
 from controller.jwtValidation import validate_jwt
 
@@ -96,9 +96,11 @@ async def middleware(request: Request, call_next):
 
     try:
         payload = validate_jwt(token)
+
         if not payload:
             logger.warning(f"Token inválido para rota: {path}")
-            return JSONResponse(status_code=401, content={"detail": "Token inválido"})
+            return JSONResponse(status_code=401, content={"detail": "Token inválido"}) 
+
         request.state.user = payload
         logger.debug(
             f"Token validado com sucesso para utilizador: {payload.get('sub')}"
@@ -113,7 +115,7 @@ async def middleware(request: Request, call_next):
 
 
 app.include_router(userRouter)
-#app.include_router(reservaRouter)
+app.include_router(reservaRouter)
 app.include_router(roomRouter)
 
 

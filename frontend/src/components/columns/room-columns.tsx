@@ -23,6 +23,10 @@ function ActionsCell({ room }: { room: Room }) {
     navigate(`/room-edit/${room.id}`);
   };
 
+  const handleViewReservations = () => {
+    navigate(`/reservas/${room.id}`);
+  };
+
   const handleDelete = () => {
     deleteRoom.mutate(room.id);
   };
@@ -39,6 +43,9 @@ function ActionsCell({ room }: { room: Room }) {
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleEdit}>
             Editar
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleViewReservations}>
+            Ver Reservas
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={handleDelete}

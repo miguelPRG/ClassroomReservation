@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DataTable from "@/components/DataTable";
+import { Pagination } from "@/components/Pagination";
 import { roomColumns } from "@/components/columns/room-columns";
 import { useRoomQuery } from "@/hooks/use-rooms";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,20 +46,15 @@ export function DashboardPage() {
               <p className="text-muted-foreground">Nenhuma sala disponível</p>
             </div>
           )}
-          <div className="flex justify-between mt-4">
-            <Button
-              onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-              disabled={page === 0}
-            >
-              Anterior
-            </Button>
-            <Button
-              onClick={() => setPage((prev) => prev + 1)}
-              disabled={data ? data.length < 3 : true} // Desabilita se menos de 3 salas forem retornadas (última página)
-            >
-              Próxima
-            </Button>
-          </div>
+          {!isLoading && !error && (
+            <Pagination
+              page={page}
+              onPreviousPage={() => setPage((prev) => Math.max(prev - 1, 0))}
+              onNextPage={() => setPage((prev) => prev + 1)}
+              isFirstPage={page === 0}
+              isLastPage={data ? data.length < 3 : true}
+            />
+          )}
         </CardContent>
       </Card>
     </>

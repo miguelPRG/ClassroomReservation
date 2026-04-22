@@ -1,5 +1,6 @@
 import type { AuthUser, LoginPayload, RegisterPayload } from "@/types/auth";
 import type { RoomPayload, Room } from "@/types/room";
+import type {Reservation} from "@/types/reservation";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -77,7 +78,7 @@ export const roomApi = {
       }
     ),
   getById: (roomID: string) =>
-    request<Room[]>(
+    request<Room>(
       `/room/${roomID}`,
       {
         method: "GET",
@@ -96,13 +97,16 @@ export const roomApi = {
 
 export const reservaApi = {
   create: (payload: any) =>
-    request("/reserva", {
+    request("/reservation", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  get: (reservaID: string | null = null) =>
-    request(`/reserva${reservaID ? `/${reservaID}` : ""}`, {
+  getByRoom: (roomID: string) =>
+    request<Reservation[]>(`/reservation/room/${roomID}`, {
       method: "GET",
     }),
-  //delete: (reservaID: string) =>
-}
+  delete: (reservationID: string) =>
+    request(`/reservation/${reservationID}`, {
+      method: "DELETE",
+    })
+};
