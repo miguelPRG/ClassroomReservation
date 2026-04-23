@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
 const columnHelper = createColumnHelper<Room>();
 
 function ActionsCell({ room }: { room: Room }) {
@@ -41,16 +40,11 @@ function ActionsCell({ room }: { room: Room }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleEdit}>
-            Editar
-          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleEdit}>Editar</DropdownMenuItem>
           <DropdownMenuItem onClick={handleViewReservations}>
             Ver Reservas
           </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={handleDelete}
-            className="text-red-600"
-          >
+          <DropdownMenuItem onClick={handleDelete} className="text-red-600">
             Apagar
           </DropdownMenuItem>
         </DropdownMenuContent>

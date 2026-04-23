@@ -15,7 +15,12 @@ export function Header() {
       <div className="flex items-center justify-between px-6">
         {/* Logo/App Name */}
         <div className="flex items-center">
-          <h1 className="text-2xl font-bold hover:cursor-pointer" onClick={() => navigate("/") }>RoomMate</h1>
+          <h1
+            className="text-2xl font-bold hover:cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            RoomMate
+          </h1>
         </div>
 
         {/* Logout Button */}

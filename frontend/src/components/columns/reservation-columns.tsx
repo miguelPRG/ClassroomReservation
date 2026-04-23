@@ -1,27 +1,21 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Trash } from "lucide-react";
 import { useState } from "react";
 import type { Reservation } from "@/types/reservation";
 import { useReservationDelete } from "@/hooks/use-reservations";
 import { AlertDialog } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const columnHelper = createColumnHelper<Reservation>();
 
 function ActionsCell({ reservation }: { reservation: Reservation }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteReservation = useReservationDelete();
-
-  const handleEdit = () => {
-    console.log("Editar reserva:", reservation.id);
-  };
 
   const handleDeleteConfirm = () => {
     deleteReservation.mutate(reservation.id, {
@@ -33,27 +27,20 @@ function ActionsCell({ reservation }: { reservation: Reservation }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Abrir menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleEdit}>
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => setShowDeleteDialog(true)}
-              className="text-red-600"
-            >
-              Apagar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className="bg-red-600 hover:bg-red-700 rounded-xl p-2 cursor-pointer inline-flex items-center transition-colors"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash className="h-4 w-4" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" sideOffset={5}>
+          Apagar reserva
+        </TooltipContent>
+      </Tooltip>
+
       <AlertDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
@@ -73,17 +60,13 @@ export const reservationColumns = [
   columnHelper.accessor("start_datetime", {
     header: "Data/Hora de Início",
     cell: (info) => (
-      <div>
-        {new Date(info.getValue()).toLocaleString("pt-PT")}
-      </div>
+      <div>{new Date(info.getValue()).toLocaleString("pt-PT")}</div>
     ),
   }),
   columnHelper.accessor("end_datetime", {
     header: "Data/Hora de Fim",
     cell: (info) => (
-      <div>
-        {new Date(info.getValue()).toLocaleString("pt-PT")}
-      </div>
+      <div>{new Date(info.getValue()).toLocaleString("pt-PT")}</div>
     ),
   }),
   columnHelper.accessor("created_at", {

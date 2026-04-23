@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { ApiError, reservaApi } from "@/lib/api-client";
-import type { ReservationPayload, } from "@/types/reservation";
+import type { ReservationPayload } from "@/types/reservation";
 
 export function useReservationCreate() {
   const queryClient = useQueryClient();
@@ -22,11 +22,13 @@ export function useReservationCreate() {
   });
 }
 
-export function useReservationQueryByRoom({
-  roomId,
-}: {
-  roomId: string;
-} = {} as any) {
+export function useReservationQueryByRoom(
+  {
+    roomId,
+  }: {
+    roomId: string;
+  } = {} as any,
+) {
   return useQuery({
     queryKey: ["reservations", roomId],
     queryFn: () => reservaApi.getByRoom(roomId),

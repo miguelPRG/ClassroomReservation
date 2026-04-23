@@ -133,6 +133,6 @@
   }
 }
 
-nav.li{
+nav.li {
   @apply hover:cursor-pointer;
 }

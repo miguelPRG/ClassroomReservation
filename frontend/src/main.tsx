@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import App from "./App.tsx";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 document.documentElement.classList.add("dark");
 
@@ -33,17 +34,19 @@ if (import.meta.env.DEV) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnHover
-        theme="dark"
-      />
-      {ReactQueryDevtools && <ReactQueryDevtools />}
+      <TooltipProvider>
+        <App />
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          theme="dark"
+        />
+        {ReactQueryDevtools && <ReactQueryDevtools />}
+      </TooltipProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

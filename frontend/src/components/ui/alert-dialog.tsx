@@ -28,7 +28,7 @@ export function AlertDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div 
+      <div
         className="fixed inset-0 bg-black/50"
         onClick={() => onOpenChange(false)}
       />

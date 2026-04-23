@@ -13,7 +13,7 @@ export function DashboardPage() {
   const [page, setPage] = useState(0);
 
   const { data, isLoading, error } = useRoomQuery({ page });
-  
+
   return (
     <>
       <Card className="h-150 w-300 mx-auto">
@@ -22,10 +22,7 @@ export function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-end">
-            <Button
-              onClick={() => navigate(`/room-edit`)}
-              className="mb-4"
-            >
+            <Button onClick={() => navigate(`/room-edit`)} className="mb-4">
               Adicionar Sala
             </Button>
           </div>

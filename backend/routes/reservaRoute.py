@@ -71,18 +71,30 @@ async def get_reservations_by_room(room_id: str):
 
     reservations = await database.user_sala_collection.find({"room_id": ObjectId(room_id)}).to_list(None)
 
+    print("Reservas encontradas para a sala:", reservations)
+
     result = []
     for reservation in reservations:
+
+        # Procurar o user que o id é igual a reservation.get("created_by", "") e obter o nome do user
+        nome = "Desconecido"
+        user_found = await database.user_collection.find_one({"_id": ObjectId(reservation.get("created_by", ""))})
+        print("Nome do user encontrado:", user_found)
+        if user_found:
+            nome = user_found.get("nome", "Desconecido")
+
         reservation_data = {
             "_id": str(reservation["_id"]),
             "room_id": str(reservation.get("room_id", "")),
             "start_datetime": reservation.get("start_datetime"),
             "end_datetime": reservation.get("end_datetime"),
-            "created_by": str(reservation.get("created_by", "")),
+            "created_by": nome,
             "created_at": reservation.get("created_at")
         }
         result.append(Reservation(**reservation_data))
     
+    print("Resultado:", result)
+
     return result
 
 @reservaRouter.delete("/{reservation_id}",

@@ -13,7 +13,12 @@ interface RoomFormProps {
   onCancel: () => void;
 }
 
-export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFormProps) {
+export function RoomForm({
+  room,
+  onSubmit,
+  isLoading = false,
+  onCancel,
+}: RoomFormProps) {
   const isEditing = !!room;
 
   const {
@@ -171,7 +176,12 @@ export function RoomForm({ room, onSubmit, isLoading = false, onCancel }: RoomFo
 
         {/* Botões */}
         <div className="flex gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="flex-1"
+          >
             Cancelar
           </Button>
           <Button type="submit" disabled={isLoading} className="flex-1">

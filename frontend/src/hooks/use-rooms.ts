@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { ApiError, roomApi } from "@/lib/api-client";
 import type { RoomPayload } from "@/types/room";
@@ -24,26 +29,28 @@ export function useRoomCreate() {
 
 export function useRoomQuery({
   page = -1,
-  ativar = true
+  ativar = true,
 }: {
-  page?: number, 
-  ativar?: boolean
+  page?: number;
+  ativar?: boolean;
 } = {}) {
   return useQuery({
     queryKey: ["rooms", page > -1 ? page : null],
     queryFn: () => roomApi.list(page > -1 ? page : undefined),
     enabled: ativar,
-    placeholderData: keepPreviousData
+    placeholderData: keepPreviousData,
   });
 }
 
-export function useRoomQueryById({
-  roomID,
-  ativar = true
-}: {
-  roomID: string, 
-  ativar?: boolean
-} = {} as any) {
+export function useRoomQueryById(
+  {
+    roomID,
+    ativar = true,
+  }: {
+    roomID: string;
+    ativar?: boolean;
+  } = {} as any,
+) {
   return useQuery({
     queryKey: ["rooms", roomID],
     queryFn: () => roomApi.getById(roomID),

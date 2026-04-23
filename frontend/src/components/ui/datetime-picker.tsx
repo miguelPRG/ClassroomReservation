@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "lucide-react";
 
-interface DateTimePickerProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+interface DateTimePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
 }
@@ -30,7 +29,7 @@ export const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
         {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 DateTimePicker.displayName = "DateTimePicker";

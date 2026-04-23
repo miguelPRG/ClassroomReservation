@@ -1,4 +1,4 @@
-import { useParams, useNavigate} from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { RoomForm } from "@/components/forms/room-form";
 import { useRoomCreate, useRoomUpdate, useRoomQuery } from "@/hooks/use-rooms";
@@ -7,23 +7,26 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Room } from "@/types/room";
 
 export function RoomEditPage() {
-  const { id } = useParams<{ id: string  }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   // Query para carregar dados da sala específica (desabilitada em modo criação)
-  const { data: queryData, isLoading: isQueryLoading } = useRoomQuery({ativar: !!id, roomID: id});
-  
+  const { data: queryData, isLoading: isQueryLoading } = useRoomQuery({
+    ativar: !!id,
+    roomID: id,
+  });
+
   console.log("ID da sala:", id);
 
   let room: Room | null = null;
 
-  if(id){
-    room = Array.isArray(queryData) && queryData.length > 0 ? queryData[0] : null;
+  if (id) {
+    room =
+      Array.isArray(queryData) && queryData.length > 0 ? queryData[0] : null;
   }
 
-
   console.log("Room data:", room);
-  
+
   // Verifica se está no modo edição
   const isEditing = !!id;
 
@@ -31,7 +34,8 @@ export function RoomEditPage() {
   const createMutation = useRoomCreate();
   const updateMutation = useRoomUpdate();
 
-  const isLoading = createMutation.isPending || updateMutation.isPending || isQueryLoading;
+  const isLoading =
+    createMutation.isPending || updateMutation.isPending || isQueryLoading;
 
   function handleSubmit(data: RoomFormData) {
     console.log("Form data:", data);

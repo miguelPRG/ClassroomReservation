@@ -10,7 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function ReservasRoom() {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
-  const { data: reservations = [], isLoading, error } = useReservationQueryByRoom({
+  const {
+    data: reservations = [],
+    isLoading,
+    error,
+  } = useReservationQueryByRoom({
     roomId: roomId || "",
   });
 
@@ -37,9 +41,7 @@ export default function ReservasRoom() {
             </Button>
             <CardTitle>Reservas da Sala</CardTitle>
           </div>
-          <Button
-            onClick={() => navigate(`/reservas/${roomId}/criar`)}
-          >
+          <Button onClick={() => navigate(`/reservas/${roomId}/criar`)}>
             Criar Reserva
           </Button>
         </div>
