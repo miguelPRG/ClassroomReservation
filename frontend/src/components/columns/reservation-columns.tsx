@@ -69,15 +69,7 @@ export const reservationColumns = [
       <div>{new Date(info.getValue()).toLocaleString("pt-PT")}</div>
     ),
   }),
-  columnHelper.accessor("created_at", {
-    header: "Criada em",
-    cell: (info) => (
-      <div className="text-sm text-gray-500">
-        {new Date(info.getValue()).toLocaleString("pt-PT")}
-      </div>
-    ),
-  }),
-  columnHelper.accessor("creator_name", {
+  columnHelper.accessor("created_by", {
     header: "Criada por (Nome)",
     cell: (info) => <div>{info.getValue() || "-"}</div>,
   }),

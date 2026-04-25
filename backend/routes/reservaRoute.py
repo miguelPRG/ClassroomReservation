@@ -89,7 +89,7 @@ async def get_reservations_by_room(room_id: str):
             "start_datetime": reservation.get("start_datetime"),
             "end_datetime": reservation.get("end_datetime"),
             "created_by": nome,
-            "created_at": reservation.get("created_at")
+            "creator_email": user_found.get("email", "Desconhecido")
         }
         result.append(Reservation(**reservation_data))
     

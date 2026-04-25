@@ -48,8 +48,7 @@ class Reservation(BaseModel):
     start_datetime: datetime
     end_datetime: datetime
     created_by: str
-    created_at: datetime
-
+    creator_email: str
 
 class ReservationMessage(BaseModel):
     """
