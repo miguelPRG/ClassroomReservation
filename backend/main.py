@@ -99,7 +99,7 @@ async def middleware(request: Request, call_next):
 
         if not payload:
             logger.warning(f"Token inválido para rota: {path}")
-            return JSONResponse(status_code=401, content={"detail": "Token inválido"}) 
+            return JSONResponse(status_code=401, content={"detail": "Token inválido"})
 
         request.state.user = payload
         logger.debug(

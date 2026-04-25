@@ -47,7 +47,9 @@ async def create_user(user: UserCreate, request: Request):
         new_user_id = new_user.inserted_id
     except DuplicateKeyError:
         logger.warning(f"Email já existente: {user.email}")
-        raise HTTPException(status_code=400, detail="Já existe um utilizador com esse email")
+        raise HTTPException(
+            status_code=400, detail="Já existe um utilizador com esse email"
+        )
     except Exception as e:
         logger.error(f"Erro ao criar utilizador {user.email}: {str(e)}", exc_info=True)
         raise HTTPException(

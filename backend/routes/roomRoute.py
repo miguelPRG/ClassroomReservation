@@ -12,6 +12,7 @@ roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
 
 logger = logging.getLogger(__name__)
 
+
 # 🔹 Criar sala
 @roomRouter.post(
     "/",
@@ -38,7 +39,10 @@ async def create_room(room: RoomCreate, request: Request):
             logger.info(f"Sala criada com ID: {result.inserted_id}")
         else:
             logger.error("Falha ao criar sala: ID de inserção não retornado")
-            raise HTTPException(status_code=500, detail="Erro ao criar sala: ID de inserção não retornado")
+            raise HTTPException(
+                status_code=500,
+                detail="Erro ao criar sala: ID de inserção não retornado",
+            )
 
     except DuplicateKeyError:
         logger.warning(f"Já existe sala com esse nome: {room.name}")
@@ -65,18 +69,19 @@ async def list_all_rooms(page: int = 0, request: Request = None):
     Uma sala é FREE se NÃO houver nenhuma reserva onde start_date <= now <= end_date
     """
     limit = 3
-    
+
     # Define o pipeline de agregação complexo
     pipeline = [
         # 🔹 Aplica paginação: pula N salas e limita o resultado a 10
         {"$skip": page * limit},
         {"$limit": limit},
-        
         # 🔹 LEFT JOIN com a coleção user_sala para buscar reservas ativas
         {
             "$lookup": {
                 "from": "user_sala",  # Coleção a fazer join
-                "let": {"room_id": "$_id"},  # Exporta o ID da sala para usar no pipeline interno
+                "let": {
+                    "room_id": "$_id"
+                },  # Exporta o ID da sala para usar no pipeline interno
                 "pipeline": [
                     {
                         # Filtra apenas reservas onde o momento atual (now) está entre start_date e end_date
@@ -88,16 +93,15 @@ async def list_all_rooms(page: int = 0, request: Request = None):
                                     # Agora é DEPOIS ou IGUAL ao início da reserva
                                     {"$lte": ["$start_date", request.state.now]},
                                     # Agora é ANTES ou IGUAL ao fim da reserva
-                                    {"$gte": ["$end_date", request.state.now]}
+                                    {"$gte": ["$end_date", request.state.now]},
                                 ]
                             }
                         }
                     }
                 ],
-                "as": "active_reservations"  # Resultado armazenado neste array
+                "as": "active_reservations",  # Resultado armazenado neste array
             }
         },
-        
         # 🔹 Adiciona novos campos calculados
         {
             "$addFields": {
@@ -105,19 +109,18 @@ async def list_all_rooms(page: int = 0, request: Request = None):
                 # isFree = false se houver pelo menos 1 reserva ativa
                 "isFree": {"$eq": [{"$size": "$active_reservations"}, 0]},
                 # Converte o _id para string para retornar como "id"
-                "id": {"$toString": "$_id"}
+                "id": {"$toString": "$_id"},
             }
         },
-        
         # 🔹 Remove campos desnecessários do resultado final
         {
             "$project": {
                 "_id": 0,  # Remove o _id original
-                "active_reservations": 0  # Remove o array de reservas (não queremos retornar)
+                "active_reservations": 0,  # Remove o array de reservas (não queremos retornar)
             }
-        }
+        },
     ]
-    
+
     # Executa a agregação e retorna todas as salas processadas
     cursor = database.sala_collection.aggregate(pipeline)
     rooms = await cursor.to_list(None)

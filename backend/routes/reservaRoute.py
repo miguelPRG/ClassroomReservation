@@ -15,7 +15,7 @@ reservaRouter = APIRouter(prefix="/reservation", tags=["Reservation"])
             "description": "Já existe uma reserva para esta sala neste intervalo de tempo"
         },
     },
-    response_model=ReservationMessage
+    response_model=ReservationMessage,
 )
 async def create_reservation(reservation: ReservationCreate, request: Request):
     """
@@ -31,11 +31,13 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
         raise HTTPException(status_code=404, detail="Sala não encontrada")
 
     # Verificar se existe alguma reserva conflitante
-    conflict = await database.user_sala_collection.find_one({
-        "room_id": reservation.room_id,
-        "start_datetime": {"$lte": reservation.end_datetime},
-        "end_datetime": {"$gte": reservation.start_datetime},
-    })
+    conflict = await database.user_sala_collection.find_one(
+        {
+            "room_id": reservation.room_id,
+            "start_datetime": {"$lte": reservation.end_datetime},
+            "end_datetime": {"$gte": reservation.start_datetime},
+        }
+    )
     if conflict:
         raise HTTPException(status_code=409, detail="Conflito de reserva")
 
@@ -53,6 +55,7 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
 
     return ReservationMessage(message="Reserva criada com sucesso")
 
+
 @reservaRouter.get(
     "/room/{room_id}",
     summary="Obter todas as reservas de uma sala",
@@ -60,7 +63,7 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
         400: {"description": "ID de sala inválido"},
         404: {"description": "Sala não encontrada"},
     },
-    response_model=list[Reservation]
+    response_model=list[Reservation],
 )
 async def get_reservations_by_room(room_id: str):
     """
@@ -69,7 +72,9 @@ async def get_reservations_by_room(room_id: str):
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID de sala inválido")
 
-    reservations = await database.user_sala_collection.find({"room_id": ObjectId(room_id)}).to_list(None)
+    reservations = await database.user_sala_collection.find(
+        {"room_id": ObjectId(room_id)}
+    ).to_list(None)
 
     print("Reservas encontradas para a sala:", reservations)
 
@@ -78,7 +83,9 @@ async def get_reservations_by_room(room_id: str):
 
         # Procurar o user que o id é igual a reservation.get("created_by", "") e obter o nome do user
         nome = "Desconecido"
-        user_found = await database.user_collection.find_one({"_id": ObjectId(reservation.get("created_by", ""))})
+        user_found = await database.user_collection.find_one(
+            {"_id": ObjectId(reservation.get("created_by", ""))}
+        )
         print("Nome do user encontrado:", user_found)
         if user_found:
             nome = user_found.get("nome", "Desconecido")
@@ -89,28 +96,32 @@ async def get_reservations_by_room(room_id: str):
             "start_datetime": reservation.get("start_datetime"),
             "end_datetime": reservation.get("end_datetime"),
             "created_by": nome,
-            "creator_email": user_found.get("email", "Desconhecido")
+            "creator_email": user_found.get("email", "Desconhecido"),
         }
         result.append(Reservation(**reservation_data))
-    
+
     print("Resultado:", result)
 
     return result
 
-@reservaRouter.delete("/{reservation_id}",
+
+@reservaRouter.delete(
+    "/{reservation_id}",
     summary="Deletar uma reserva",
     responses={
         400: {"description": "ID de reserva inválido"},
         404: {"description": "Reserva não encontrada"},
     },
-    response_model=ReservationMessage)
+    response_model=ReservationMessage,
+)
 async def delete_reservation(reservation_id: str):
-    """Apaga uma reserva específica pelo ID. Verifica se o ID da reserva é válido e retorna uma mensagem de sucesso ou um erro apropriado.
-    """
+    """Apaga uma reserva específica pelo ID. Verifica se o ID da reserva é válido e retorna uma mensagem de sucesso ou um erro apropriado."""
     if not ObjectId.is_valid(reservation_id):
         raise HTTPException(status_code=400, detail="ID de reserva inválido")
 
-    result = await database.user_sala_collection.delete_one({"_id": ObjectId(reservation_id)})
+    result = await database.user_sala_collection.delete_one(
+        {"_id": ObjectId(reservation_id)}
+    )
 
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Reserva não encontrada")

@@ -1,9 +1,11 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+
 class UserCreate(BaseModel):
     """
     Modelo para criação de um novo utilizador. Inclui validação de email e password.
     """
+
     nome: str = Field(..., max_length=50)
     email: EmailStr = Field(..., max_length=150)
     password: str = Field(..., min_length=10, max_length=150)
@@ -29,6 +31,7 @@ class UserLogin(BaseModel):
     """
     Modelo para autenticação de um utilizador. Inclui validação de email e password.
     """
+
     email: EmailStr = Field(..., max_length=150)
     password: str = Field(..., min_length=10, max_length=150)
 
@@ -45,6 +48,7 @@ class User(BaseModel):
     """
     Modelo para retorno de informações de um utilizador. Inclui o ID, nome e email.
     """
+
     id: str
     nome: str
     email: str
