@@ -70,9 +70,9 @@ export const roomApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  list: (page?: number | null) =>
+  list: (page?: number | null, pageSize?: number | null) =>
     request<Room[]>(
-      `/room${page !== undefined && page !== null ? `?page=${page}` : ""}`,
+      `/room${page !== undefined && page !== null ? `?page=${page}` : ""}${pageSize !== undefined && pageSize !== null ? `&page_size=${pageSize}` : ""}`,
       {
         method: "GET",
       },
@@ -98,10 +98,13 @@ export const reservaApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  getByRoom: (roomID: string) =>
-    request<Reservation[]>(`/reservation/room/${roomID}`, {
-      method: "GET",
-    }),
+  getByRoom: (roomID: string, page?: number | null, pageSize?: number | null) =>
+    request<Reservation[]>(
+      `/reservation/room/${roomID}${page !== undefined && page !== null ? `?page=${page}` : ""}${pageSize !== undefined && pageSize !== null ? `&page_size=${pageSize}` : ""}`,
+      {
+        method: "GET",
+      },
+    ),
   delete: (reservationID: string) =>
     request(`/reservation/${reservationID}`, {
       method: "DELETE",

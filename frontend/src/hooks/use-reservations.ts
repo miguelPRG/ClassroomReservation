@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { ApiError, reservaApi } from "@/lib/api-client";
 import type { ReservationPayload } from "@/types/reservation";
@@ -32,8 +32,28 @@ export function useReservationQueryByRoom(
   return useQuery({
     queryKey: ["reservations", roomId],
     queryFn: () => reservaApi.getByRoom(roomId),
+    placeholderData: keepPreviousData,
   });
 }
+
+export function useReservationQueryByRoomPaginated(
+  {
+    roomId,
+    page = 0,
+    pageSize = 5,
+  }: {
+    roomId: string;
+    page?: number;
+    pageSize?: number;
+  } = {} as any,
+) {
+  return useQuery({
+    queryKey: ["reservations", roomId, page, pageSize],
+    queryFn: () => reservaApi.getByRoom(roomId, page, pageSize),
+    placeholderData: keepPreviousData,
+  });
+}
+
 
 export function useReservationDelete() {
   const queryClient = useQueryClient();

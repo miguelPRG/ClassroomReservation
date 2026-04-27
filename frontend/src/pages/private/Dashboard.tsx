@@ -7,18 +7,45 @@ import { roomColumns } from "@/components/columns/room-columns";
 import { useRoomQuery } from "@/hooks/use-rooms";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 20];
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
-  const { data, isLoading, error } = useRoomQuery({ page });
+  const { data, isLoading, error } = useRoomQuery({ page, pageSize });
 
   return (
     <>
       <Card className="h-150 w-300 mx-auto">
         <CardHeader>
-          <CardTitle>Salas Disponíveis</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Salas Disponíveis</CardTitle>
+            <Select value={pageSize.toString()} onValueChange={(value) => {
+              setPageSize(Number(value));
+              setPage(0);
+            }}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size} por página
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex justify-end">
@@ -46,10 +73,11 @@ export function DashboardPage() {
           {!isLoading && !error && (
             <Pagination
               page={page}
+              pageSize={pageSize}
               onPreviousPage={() => setPage((prev) => Math.max(prev - 1, 0))}
               onNextPage={() => setPage((prev) => prev + 1)}
               isFirstPage={page === 0}
-              isLastPage={data ? data.length < 3 : true}
+              isLastPage={data ? data.length < pageSize : true}
             />
           )}
         </CardContent>

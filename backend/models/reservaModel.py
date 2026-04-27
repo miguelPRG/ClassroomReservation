@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from datetime import datetime, timedelta, timezone
 
 
@@ -44,13 +44,13 @@ class Reservation(BaseModel):
     """
     Modelo para uma reserva completa, incluindo campos de auditoria.
     """
-
-    id: str = Field(..., alias="_id")
+    id: str
     room_id: str
     start_datetime: datetime
     end_datetime: datetime
     created_by: str
     creator_email: str
+    estado: str
 
 
 class ReservationMessage(BaseModel):

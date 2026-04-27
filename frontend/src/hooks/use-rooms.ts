@@ -29,14 +29,16 @@ export function useRoomCreate() {
 
 export function useRoomQuery({
   page = -1,
+  pageSize = -1,
   ativar = true,
 }: {
   page?: number;
+  pageSize?: number;
   ativar?: boolean;
 } = {}) {
   return useQuery({
-    queryKey: ["rooms", page > -1 ? page : null],
-    queryFn: () => roomApi.list(page > -1 ? page : undefined),
+    queryKey: ["rooms", page > -1 ? page : null, pageSize > -1 ? pageSize : null],
+    queryFn: () => roomApi.list(page > -1 ? page : undefined, pageSize > -1 ? pageSize : undefined),
     enabled: ativar,
     placeholderData: keepPreviousData,
   });

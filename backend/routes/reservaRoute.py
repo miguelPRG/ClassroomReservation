@@ -39,11 +39,12 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
         }
     )
     if conflict:
-        raise HTTPException(status_code=409, detail="Conflito de reserva")
+        raise HTTPException(status_code=409, detail="Conflito de reserva. Já existe uma reserva para esta sala neste intervalo de tempo")
 
     reservation_dict = reservation.model_dump()
     reservation_dict["created_by"] = user_id
     reservation_dict["created_at"] = request.state.now
+    reservation_dict["estado"] = "ativa"
 
     try:
         await database.user_sala_collection.insert_one(reservation_dict)
@@ -65,42 +66,58 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
     },
     response_model=list[Reservation],
 )
-async def get_reservations_by_room(room_id: str):
+async def get_reservations_by_room(room_id: str, request: Request, page: int = 0, page_size: int = 5):
     """
-    Retorna todas as reservas de uma sala específica. Verifica se o ID da sala é válido e retorna as reservas ou um erro apropriado.
+    Retorna todas as reservas de uma sala específica de forma paginada. Verifica se o ID da sala é válido e retorna as reservas ou um erro apropriado.
     """
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID de sala inválido")
 
+    if page < 0:
+        page = 0
+    
+    # Limitar page_size entre 1 e 100 para evitar abusos
+    if page_size < 1 or page_size > 100:
+        page_size = 5
+
+    skip = page * page_size
     reservations = await database.user_sala_collection.find(
         {"room_id": ObjectId(room_id)}
-    ).to_list(None)
-
-    print("Reservas encontradas para a sala:", reservations)
+    ).skip(skip).limit(page_size).to_list(None)
 
     result = []
     for reservation in reservations:
-
         # Procurar o user que o id é igual a reservation.get("created_by", "") e obter o nome do user
         nome = "Desconecido"
+        creator_email = "Desconhecido"
         user_found = await database.user_collection.find_one(
             {"_id": ObjectId(reservation.get("created_by", ""))}
         )
-        print("Nome do user encontrado:", user_found)
+
         if user_found:
             nome = user_found.get("nome", "Desconecido")
+            creator_email = user_found.get("email", "Desconhecido")
+
+        estado = reservation.get("estado", "desconecido")
+
+        # Vamos verificar se o estado está ativo e se o intervalos de tempo da reserva é válido
+        if reservation.get("estado", "") == "ativa" and reservation.get("end_datetime") < request.state.now:
+            # Se a reserva já passou, vamos atualizar o estado para "expirada"
+            await database.user_sala_collection.update_one(
+                {"_id": reservation["_id"]}, {"$set": {"estado": "expirada"}}
+            )
+            estado = "expirada"
 
         reservation_data = {
-            "_id": str(reservation["_id"]),
+            "id": str(reservation["_id"]),
             "room_id": str(reservation.get("room_id", "")),
             "start_datetime": reservation.get("start_datetime"),
             "end_datetime": reservation.get("end_datetime"),
             "created_by": nome,
-            "creator_email": user_found.get("email", "Desconhecido"),
+            "creator_email": creator_email,
+            "estado": estado,
         }
         result.append(Reservation(**reservation_data))
-
-    print("Resultado:", result)
 
     return result
 

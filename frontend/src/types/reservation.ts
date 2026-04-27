@@ -11,6 +11,6 @@ export type Reservation = {
   end_datetime: string;
   created_by: string;
   created_at: string;
-  creator_name?: string;
   creator_email?: string;
+  estado?: string;
 };

@@ -3,27 +3,39 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DataTable from "@/components/DataTable";
+import { Pagination } from "@/components/Pagination";
 import { reservationColumns } from "@/components/columns/reservation-columns";
-import { useReservationQueryByRoom } from "@/hooks/use-reservations";
+import { useReservationQueryByRoomPaginated } from "@/hooks/use-reservations";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 20];
 
 export default function ReservasRoom() {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
   const {
     data: reservations = [],
     isLoading,
     error,
-  } = useReservationQueryByRoom({
+  } = useReservationQueryByRoomPaginated({
     roomId: roomId || "",
+    page,
+    pageSize,
   });
 
   if (!roomId) {
-    return (
-      <div className="p-4">
-        <p className="text-red-600">Erro: ID da sala não foi fornecido.</p>
-      </div>
-    );
+    navigate("/salas");
+    return null;
   }
 
   return (
@@ -41,9 +53,26 @@ export default function ReservasRoom() {
             </Button>
             <CardTitle>Reservas da Sala</CardTitle>
           </div>
-          <Button onClick={() => navigate(`/reservas/${roomId}/criar`)}>
-            Criar Reserva
-          </Button>
+          <div className="flex items-center gap-2">
+            <Select value={pageSize.toString()} onValueChange={(value) => {
+              setPageSize(Number(value));
+              setPage(0);
+            }}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size} por página
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={() => navigate(`/reservas/${roomId}/criar`)}>
+              Criar Reserva
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -53,12 +82,22 @@ export default function ReservasRoom() {
           </div>
         ) : error ? (
           <div className="text-center py-8">
-            <p className="text-red-500 text-sm">
+            <p className="text-destructive text-sm">
               {error.message || "Erro ao carregar reservas"}
             </p>
           </div>
         ) : reservations && reservations.length > 0 ? (
-          <DataTable columns={reservationColumns} data={reservations} />
+          <>
+            <DataTable columns={reservationColumns} data={reservations} />
+            <Pagination
+              page={page}
+              pageSize={pageSize}
+              onPreviousPage={() => setPage((prev) => Math.max(prev - 1, 0))}
+              onNextPage={() => setPage((prev) => prev + 1)}
+              isFirstPage={page === 0}
+              isLastPage={reservations.length < pageSize}
+            />
+          </>
         ) : (
           <div className="text-center py-8">
             <p className="text-muted-foreground">Nenhuma reserva disponível</p>
