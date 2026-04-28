@@ -3,6 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/stores/auth-store";
 import type { Room } from "@/types/room";
 import { useRoomDelete } from "@/hooks/use-rooms";
 import {
@@ -17,6 +18,7 @@ const columnHelper = createColumnHelper<Room>();
 function ActionsCell({ room }: { room: Room }) {
   const navigate = useNavigate();
   const deleteRoom = useRoomDelete();
+  const isAdmin = useAuthStore((state) => state.isAdmin());
 
   const handleEdit = () => {
     navigate(`/room-edit/${room.id}`);
@@ -40,15 +42,19 @@ function ActionsCell({ room }: { room: Room }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleEdit}>Editar</DropdownMenuItem>
+          {isAdmin && (
+            <>
+              <DropdownMenuItem onClick={handleEdit}>Editar</DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={handleDelete} 
+                className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+              >
+                Apagar
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuItem onClick={handleViewReservations}>
             Ver Reservas
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={handleDelete} 
-            className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-          >
-            Apagar
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

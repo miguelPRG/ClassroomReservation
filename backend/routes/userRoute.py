@@ -59,13 +59,12 @@ async def create_user(user: UserCreate, request: Request):
     jwt_token = generate_jwt(str(new_user_id), user_dict["role"])
 
     response = JSONResponse(
-        content={
-            User(
-                id=str(new_user_id),
-                nome=user.nome,
-                email=user.email,
-            ).model_dump()
-        }
+        content=User(
+            id=str(new_user_id),
+            nome=user.nome,
+            email=user.email,
+            role=user_dict["role"],
+        ).model_dump()
     )
     response.set_cookie(
         key="token",
@@ -108,6 +107,7 @@ async def login_user(user: UserLogin, request: Request):
             id=str(existing_user["_id"]),
             nome=existing_user.get("nome"),
             email=existing_user.get("email"),
+            role=existing_user.get("role"),
         ).model_dump()
     )
     response.set_cookie(
@@ -170,4 +170,5 @@ async def auth_user(request: Request):
         id=str(user["_id"]),
         nome=user.get("nome"),
         email=user.get("email"),
+        role=user.get("role"),
     )

@@ -46,9 +46,10 @@ class UserLogout(BaseModel):
 
 class User(BaseModel):
     """
-    Modelo para retorno de informações de um utilizador. Inclui o ID, nome e email.
+    Modelo para retorno de informações de um utilizador. Inclui o ID, nome, email e role.
     """
 
     id: str
     nome: str
     email: str
+    role: str

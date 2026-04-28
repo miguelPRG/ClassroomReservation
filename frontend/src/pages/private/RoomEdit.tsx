@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { RoomForm } from "@/components/forms/room-form";
 import { useRoomCreate, useRoomUpdate, useRoomQuery } from "@/hooks/use-rooms";
+import { useAuthStore } from "@/stores/auth-store";
 import type { RoomFormData } from "@/lib/schemas/room-schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Room } from "@/types/room";
@@ -9,6 +10,14 @@ import type { Room } from "@/types/room";
 export function RoomEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isAdmin = useAuthStore((state) => state.isAdmin());
+
+  // Redirecionar se não for admin
+  useEffect(() => {
+    if (!isAdmin) {
+      navigate("/");
+    }
+  }, [isAdmin, navigate]);
 
   // Query para carregar dados da sala específica (desabilitada em modo criação)
   const { data: queryData, isLoading: isQueryLoading } = useRoomQuery({

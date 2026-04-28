@@ -2,10 +2,14 @@ import { useLogout } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/stores/auth-store";
 
 export function Header() {
   const logout = useLogout();
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const role = useAuthStore((state) => state.role);
+
   const handleLogout = () => {
     logout();
   };
@@ -23,8 +27,16 @@ export function Header() {
           </h1>
         </div>
 
-        {/* Logout Button */}
-        <div>
+        {/* User Info and Logout Button */}
+        <div className="flex items-center gap-4">
+          {user && (
+            <div className="text-right text-sm">
+              <p className="font-medium text-white">{user.nome}</p>
+              <p className="text-xs text-gray-300">
+                {role === "admin" ? "👑 Administrador" : "👤 Utilizador"}
+              </p>
+            </div>
+          )}
           <Button
             variant="ghost"
             size="sm"

@@ -1,12 +1,11 @@
 from asyncio.log import logger
-from urllib import request
-
 from fastapi import APIRouter, HTTPException, Request
 from bson import ObjectId
 from models.roomModel import RoomCreate, Room, RoomUpdate, RoomMessage
 import database
 from pymongo.errors import DuplicateKeyError
 import logging
+from controller.authMiddleware import require_admin
 
 roomRouter = APIRouter(prefix="/room", tags=["Rooms"])
 
@@ -25,8 +24,11 @@ logger = logging.getLogger(__name__)
 )
 async def create_room(room: RoomCreate, request: Request):
     """
-    Cria uma nova sala com oPartial<CreateRoomPayload>) => detalhes fornecidos de RoomCreate
+    Cria uma nova sala com detalhes fornecidos de RoomCreate. Apenas administradores podem criar salas.
     """
+    # Verificar se é administrador
+    require_admin(request)
+    
     room_dict = room.model_dump()
     room_dict["isFree"] = True
     room_dict["created_at"] = request.state.now
@@ -137,8 +139,10 @@ async def get_room(room_id: str, request: Request):
 )
 async def update_room(room_id: str, room: RoomUpdate, request: Request):
     """
-    Atualiza os detalhes de uma sala existente com base no ID fornecido e nos dados de atualização de RoomUpdate
+    Atualiza os detalhes de uma sala existente com base no ID fornecido e nos dados de atualização de RoomUpdate. Apenas administradores podem atualizar salas.
     """
+    # Verificar se é administrador
+    require_admin(request)
 
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID inválido")
@@ -166,10 +170,13 @@ async def update_room(room_id: str, room: RoomUpdate, request: Request):
         404: {"description": "Sala não encontrada"},
     },
 )
-async def delete_room(room_id: str):
+async def delete_room(room_id: str, request: Request):
     """
-    Deleta uma sala específica com base no ID fornecido
+    Deleta uma sala específica com base no ID fornecido. Apenas administradores podem deletar salas.
     """
+    # Verificar se é administrador
+    require_admin(request)
+    
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID inválido")
 

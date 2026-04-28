@@ -3,6 +3,7 @@ from models.reservaModel import ReservationCreate, ReservationMessage, Reservati
 import database
 from bson import ObjectId
 from datetime import datetime, timezone
+from controller.authMiddleware import get_user_id, get_user_role
 
 reservaRouter = APIRouter(prefix="/reservation", tags=["Reservation"])
 
@@ -46,11 +47,7 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
         {
             "room_id": reservation.room_id,
             "start_datetime": {"$lte": reservation.end_datetime},
-            "end_datetime": {"$gte": reservation.start_datetime},
-            "$or": [
-                {"estado": "ativa"},
-                {"estado": "reservada"}
-            ]
+            "end_datetime": {"$gte": reservation.start_datetime}
         }
     )
     if conflict:
@@ -89,7 +86,9 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
 )
 async def get_reservations_by_room(room_id: str, request: Request, page: int = 0, page_size: int = 5):
     """
-    Retorna todas as reservas de uma sala específica de forma paginada. Verifica se o ID da sala é válido e retorna as reservas ou um erro apropriado.
+    Retorna todas as reservas de uma sala específica de forma paginada. 
+    - Administradores vêem todas as reservas da sala
+    - Utilizadores normais vêem apenas as suas próprias reservas
     """
     if not ObjectId.is_valid(room_id):
         raise HTTPException(status_code=400, detail="ID de sala inválido")
@@ -102,8 +101,18 @@ async def get_reservations_by_room(room_id: str, request: Request, page: int = 0
         page_size = 5
 
     skip = page * page_size
+    
+    # Construir filtro baseado no role
+    user_role = get_user_role(request)
+    query_filter = {"room_id": ObjectId(room_id)}
+    
+    # Se não for admin, apenas ver as suas próprias reservas
+    if user_role != "admin":
+        user_id = get_user_id(request)
+        query_filter["created_by"] = ObjectId(user_id)
+    
     reservations = await database.user_sala_collection.find(
-        {"room_id": ObjectId(room_id)}
+        query_filter
     ).skip(skip).limit(page_size).to_list(None)
 
     result = []
@@ -151,7 +160,10 @@ async def get_reservations_by_room(room_id: str, request: Request, page: int = 0
     response_model=ReservationMessage,
 )
 async def delete_reservation(reservation_id: str, request: Request):
-    """Apaga uma reserva específica pelo ID. Verifica se o ID da reserva é válido e retorna uma mensagem de sucesso ou um erro apropriado."""
+    """Apaga uma reserva específica pelo ID. 
+    - Administradores podem deletar qualquer reserva
+    - Utilizadores normais podem deletar apenas as suas próprias reservas
+    """
     if not ObjectId.is_valid(reservation_id):
         raise HTTPException(status_code=400, detail="ID de reserva inválido")
 
@@ -162,6 +174,13 @@ async def delete_reservation(reservation_id: str, request: Request):
     
     if not reservation:
         raise HTTPException(status_code=404, detail="Reserva não encontrada")
+
+    # Verificar permissão: se não for admin, só pode deletar a sua própria reserva
+    user_role = get_user_role(request)
+    if user_role != "admin":
+        user_id = get_user_id(request)
+        if str(reservation.get("created_by")) != user_id:
+            raise HTTPException(status_code=403, detail="Apenas pode deletar as suas próprias reservas")
 
     room_id = reservation.get("room_id")
     

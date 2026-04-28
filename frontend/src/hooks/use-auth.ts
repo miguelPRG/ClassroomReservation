@@ -7,6 +7,7 @@ import type { LoginPayload, RegisterPayload, AuthUser } from "@/types/auth";
 
 export function useCurrentUser() {
   const setUser = useAuthStore((state) => state.setUser);
+  const setRole = useAuthStore((state) => state.setRole);
 
   const query = useQuery({
     queryKey: ["me"],
@@ -17,19 +18,22 @@ export function useCurrentUser() {
   useEffect(() => {
     if (query.data) {
       setUser(query.data);
+      setRole(query.data.role);
     }
-  }, [query.data, query.isError, setUser]);
+  }, [query.data, query.isError, setUser, setRole]);
 
   return query;
 }
 
 export function useLogin() {
   const setUser = useAuthStore((state) => state.setUser);
+  const setRole = useAuthStore((state) => state.setRole);
 
   return useMutation({
     mutationFn: (payload: LoginPayload) => authApi.login(payload),
     onSuccess: (response: AuthUser) => {
       setUser(response);
+      setRole(response.role);
       toast.success("Login efetuado com sucesso.");
     },
     onError: (error) => {
@@ -44,11 +48,13 @@ export function useLogin() {
 
 export function useRegister() {
   const setUser = useAuthStore((state) => state.setUser);
+  const setRole = useAuthStore((state) => state.setRole);
 
   return useMutation({
     mutationFn: (payload: RegisterPayload) => authApi.register(payload),
     onSuccess: (userData) => {
       setUser(userData);
+      setRole(userData.role);
       toast.success("Conta criada com sucesso.");
     },
     onError: (error) => {
@@ -63,9 +69,11 @@ export function useRegister() {
 
 export function useLogout() {
   const setUser = useAuthStore((state) => state.setUser);
+  const setRole = useAuthStore((state) => state.setRole);
 
   return () => {
     setUser(null);
+    setRole(null);
     toast.info("Sessão terminada.");
   };
 }

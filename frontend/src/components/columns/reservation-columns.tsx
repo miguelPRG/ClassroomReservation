@@ -9,6 +9,7 @@ import { Trash } from "lucide-react";
 import { useState } from "react";
 import type { Reservation } from "@/types/reservation";
 import { useReservationDelete } from "@/hooks/use-reservations";
+import { useAuthStore } from "@/stores/auth-store";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 
 const columnHelper = createColumnHelper<Reservation>();
@@ -16,6 +17,13 @@ const columnHelper = createColumnHelper<Reservation>();
 function ActionsCell({ reservation }: { reservation: Reservation }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteReservation = useReservationDelete();
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = useAuthStore((state) => state.isAdmin());
+
+  // Check if current user can delete this reservation
+  // Admin can delete any reservation, users can only delete their own
+  const canDelete =
+    isAdmin || (user && user.id === reservation.created_by);
 
   const handleDeleteConfirm = () => {
     deleteReservation.mutate(reservation.id, {
@@ -24,6 +32,10 @@ function ActionsCell({ reservation }: { reservation: Reservation }) {
       },
     });
   };
+
+  if (!canDelete) {
+    return null;
+  }
 
   return (
     <>

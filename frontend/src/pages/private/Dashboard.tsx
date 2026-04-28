@@ -5,6 +5,7 @@ import DataTable from "@/components/DataTable";
 import { Pagination } from "@/components/Pagination";
 import { roomColumns } from "@/components/columns/room-columns";
 import { useRoomQuery } from "@/hooks/use-rooms";
+import { useAuthStore } from "@/stores/auth-store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import {
@@ -21,6 +22,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const isAdmin = useAuthStore((state) => state.isAdmin());
 
   const { data, isLoading, error } = useRoomQuery({ page, pageSize });
 
@@ -49,9 +51,11 @@ export function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-end">
-            <Button onClick={() => navigate(`/room-edit`)} className="mb-4">
-              Adicionar Sala
-            </Button>
+            {isAdmin && (
+              <Button onClick={() => navigate(`/room-edit`)} className="mb-4">
+                Adicionar Sala
+              </Button>
+            )}
           </div>
           {isLoading ? (
             <div className="flex flex-col justify-between">
