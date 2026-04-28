@@ -83,15 +83,9 @@ async def list_all_rooms(request: Request, page: int = 0, page_size: int = 10):
             sala["id"] = str(sala_id)
             del sala["_id"]
             
-            reservas_found = await database.user_sala_collection.find_one({"room_id": ObjectId(sala["id"]), "estado": "ativa", "start_datetime": {"$lte": request.state.now}, "end_datetime": {"$gte": request.state.now}})
-
-            if reservas_found:
-                sala["isFree"] = False
-                # Atualizar também na base de dados
-                await database.sala_collection.update_one(
-                    {"_id": sala_id},
-                    {"$set": {"isFree": False}}
-                )         
+            # Calcular isFree usando a função de database (lazy evaluation)
+            is_free = await database.check_room_is_free(sala_id)
+            sala["isFree"] = is_free
 
             rooms.append(Room(**sala))
         return rooms
@@ -110,7 +104,7 @@ async def list_all_rooms(request: Request, page: int = 0, page_size: int = 10):
         404: {"description": "Sala não encontrada"},
     },
 )
-async def get_room(room_id: str):
+async def get_room(room_id: str, request: Request):
     """
     Retorna uma sala específica pelo ID
     """
@@ -123,6 +117,11 @@ async def get_room(room_id: str):
 
     sala["id"] = str(sala["_id"])
     del sala["_id"]
+    
+    # Calcular isFree (lazy evaluation)
+    is_free = await database.check_room_is_free(ObjectId(room_id))
+    sala["isFree"] = is_free
+    
     return [sala]
 
 

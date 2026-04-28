@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from database import init_database
-from datetime import datetime
+from database import init_database, init_indexes
+from datetime import datetime, timezone
 from routes.userRoute import userRouter
 from routes.reservaRoute import reservaRouter
 from routes.roomRoute import roomRouter
@@ -24,9 +24,15 @@ async def lifespan(app: FastAPI):
     logger.info("Iniciando aplicação...")
     if await init_database():
         logger.info("Base de dados inicializada com sucesso.")
+        if await init_indexes():
+            logger.info("Índices inicializados com sucesso.")
+        else:
+            logger.warning("Erro ao inicializar índices.")
     else:
         logger.error("Erro ao inicializar a base de dados.")
+    
     yield
+    
     logger.info("Encerrando aplicação.")
 
 
@@ -77,8 +83,8 @@ async def middleware(request: Request, call_next):
         logger.warning(f"Origem não permitida: {origin}")
         return JSONResponse(status_code=403, content={"detail": "Origem não permitida"})
 
-    # Adicionar datetime ao request state
-    request.state.now = datetime.now()
+    # Adicionar datetime UTC ao request state
+    request.state.now = datetime.now(timezone.utc)
 
     path = request.url.path
 

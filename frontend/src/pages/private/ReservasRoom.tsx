@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DataTable from "@/components/DataTable";
 import { Pagination } from "@/components/Pagination";
 import { reservationColumns } from "@/components/columns/reservation-columns";
-import { useReservationQueryByRoomPaginated } from "@/hooks/use-reservations";
+import { useReservationQueryByRoom } from "@/hooks/use-reservations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import {
@@ -27,7 +27,7 @@ export default function ReservasRoom() {
     data: reservations = [],
     isLoading,
     error,
-  } = useReservationQueryByRoomPaginated({
+  } = useReservationQueryByRoom({
     roomId: roomId || "",
     page,
     pageSize,

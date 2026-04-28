@@ -25,20 +25,6 @@ export function useReservationCreate() {
 export function useReservationQueryByRoom(
   {
     roomId,
-  }: {
-    roomId: string;
-  } = {} as any,
-) {
-  return useQuery({
-    queryKey: ["reservations", roomId],
-    queryFn: () => reservaApi.getByRoom(roomId),
-    placeholderData: keepPreviousData,
-  });
-}
-
-export function useReservationQueryByRoomPaginated(
-  {
-    roomId,
     page = 0,
     pageSize = 5,
   }: {

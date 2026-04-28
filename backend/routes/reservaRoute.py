@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from models.reservaModel import ReservationCreate, ReservationMessage, Reservation
 import database
 from bson import ObjectId
+from datetime import datetime, timezone
 
 reservaRouter = APIRouter(prefix="/reservation", tags=["Reservation"])
 
@@ -19,8 +20,18 @@ reservaRouter = APIRouter(prefix="/reservation", tags=["Reservation"])
 )
 async def create_reservation(reservation: ReservationCreate, request: Request):
     """
-    Cria uma nova reserva. Verifica se o utilizador e a sala existem, e se não houver conflitos de reservas para a mesma sala no mesmo intervalo de tempo, insere a nova reserva na base de dados com as datas de criação e atualização.
+    Cria uma nova reserva. Verifica se o utilizador e a sala existem, e se não houver conflitos de reservas para a mesma sala no mesmo intervalo de tempo, insere a nova reserva na base de dados com estado 'reservada'.
     """
+
+    # Garantir que request.state.now é timezone-aware (UTC)
+    now = request.state.now
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+
+    # Verificar se a distancia de now e reservation.start é 1 dia no minimo
+    if (reservation.start_datetime - now).days < 1:
+        raise HTTPException(status_code=400, detail="A reserva deve ser feita com pelo menos 1 dia de antecedência")
+
     reservation.room_id = ObjectId(reservation.room_id)
     jwt_token = request.state.user
     user_id = ObjectId(jwt_token["user_id"])
@@ -30,12 +41,16 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
     if not room_exists:
         raise HTTPException(status_code=404, detail="Sala não encontrada")
 
-    # Verificar se existe alguma reserva conflitante
+    # Verificar se existe alguma reserva conflitante (ativa ou dentro do intervalo)
     conflict = await database.user_sala_collection.find_one(
         {
             "room_id": reservation.room_id,
             "start_datetime": {"$lte": reservation.end_datetime},
             "end_datetime": {"$gte": reservation.start_datetime},
+            "$or": [
+                {"estado": "ativa"},
+                {"estado": "reservada"}
+            ]
         }
     )
     if conflict:
@@ -44,10 +59,16 @@ async def create_reservation(reservation: ReservationCreate, request: Request):
     reservation_dict = reservation.model_dump()
     reservation_dict["created_by"] = user_id
     reservation_dict["created_at"] = request.state.now
-    reservation_dict["estado"] = "ativa"
+    reservation_dict["estado"] = "reservada"  # Nova reserva começa com estado "reservada"
 
     try:
         await database.user_sala_collection.insert_one(reservation_dict)
+        
+        # Atualizar isFree da sala
+        await database.sala_collection.update_one(
+            {"_id": reservation.room_id},
+            {"$set": {"isFree": False, "updated_at": request.state.now}}
+        )
 
     except Exception as e:
         raise HTTPException(
@@ -98,15 +119,13 @@ async def get_reservations_by_room(room_id: str, request: Request, page: int = 0
             nome = user_found.get("nome", "Desconecido")
             creator_email = user_found.get("email", "Desconhecido")
 
-        estado = reservation.get("estado", "desconecido")
-
-        # Vamos verificar se o estado está ativo e se o intervalos de tempo da reserva é válido
-        if reservation.get("estado", "") == "ativa" and reservation.get("end_datetime") < request.state.now:
-            # Se a reserva já passou, vamos atualizar o estado para "expirada"
-            await database.user_sala_collection.update_one(
-                {"_id": reservation["_id"]}, {"$set": {"estado": "expirada"}}
-            )
-            estado = "expirada"
+        # Calcular o estado correto da reserva (reservada, ativa, ou expirada)
+        estado = database.get_reservation_state(
+            reservation.get("start_datetime"),
+            reservation.get("end_datetime"),
+            reservation.get("estado", "reservada"),
+            request.state.now
+        )
 
         reservation_data = {
             "id": str(reservation["_id"]),
@@ -131,16 +150,32 @@ async def get_reservations_by_room(room_id: str, request: Request, page: int = 0
     },
     response_model=ReservationMessage,
 )
-async def delete_reservation(reservation_id: str):
+async def delete_reservation(reservation_id: str, request: Request):
     """Apaga uma reserva específica pelo ID. Verifica se o ID da reserva é válido e retorna uma mensagem de sucesso ou um erro apropriado."""
     if not ObjectId.is_valid(reservation_id):
         raise HTTPException(status_code=400, detail="ID de reserva inválido")
 
+    # Obter a reserva antes de deletar para saber a room_id
+    reservation = await database.user_sala_collection.find_one(
+        {"_id": ObjectId(reservation_id)}
+    )
+    
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+
+    room_id = reservation.get("room_id")
+    
+    # Deletar a reserva
     result = await database.user_sala_collection.delete_one(
         {"_id": ObjectId(reservation_id)}
     )
 
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+    if result.deleted_count > 0:
+        # Verificar se a sala agora está livre
+        is_free = await database.check_room_is_free(room_id)
+        await database.sala_collection.update_one(
+            {"_id": room_id},
+            {"$set": {"isFree": is_free, "updated_at": request.state.now}}
+        )
 
     return ReservationMessage(message="Reserva deletada com sucesso")
