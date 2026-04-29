@@ -132,9 +132,16 @@ async def get_reservations_by_room(room_id: str, request: Request, page: int = 0
         estado = database.get_reservation_state(
             reservation.get("start_datetime"),
             reservation.get("end_datetime"),
-            reservation.get("estado", "reservada"),
+            reservation.get("estado"),
             request.state.now
         )
+
+        if estado != reservation.get("estado"):
+            # Atualizar o estado na base de dados se estiver diferente
+            await database.user_sala_collection.update_one(
+                {"_id": reservation["_id"]},
+                {"$set": {"estado": estado}}
+            )
 
         reservation_data = {
             "id": str(reservation["_id"]),

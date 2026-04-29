@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { ApiError, authApi } from "@/lib/api-client";
@@ -28,6 +28,7 @@ export function useCurrentUser() {
 export function useLogin() {
   const setUser = useAuthStore((state) => state.setUser);
   const setRole = useAuthStore((state) => state.setRole);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: LoginPayload) => authApi.login(payload),
@@ -35,6 +36,10 @@ export function useLogin() {
       setUser(response);
       setRole(response.role);
       toast.success("Login efetuado com sucesso.");
+
+      // Invalidar todas as querys para garantir que dados protegidos sejam recarregados com o novo estado de autenticação
+      queryClient.invalidateQueries();
+    
     },
     onError: (error) => {
       const message =
@@ -52,7 +57,7 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: (payload: RegisterPayload) => authApi.register(payload),
-    onSuccess: (userData) => {
+    onSuccess: (userData: AuthUser) => {
       setUser(userData);
       setRole(userData.role);
       toast.success("Conta criada com sucesso.");

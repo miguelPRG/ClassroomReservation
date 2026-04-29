@@ -112,16 +112,17 @@ async def check_room_is_free(room_id: ObjectId) -> bool:
     """Verifica se uma sala está livre (sem reservas ativas ou reservadas)."""
     if user_sala_collection is None:
         return True
-    
+
     try:
-        
-        # Buscar qualquer reserva que não seja expirada
-        active_reservation = await user_sala_collection.find_one({
+        active_or_reserved_reservation = await user_sala_collection.find_one({
             "room_id": room_id,
-            "estado": {"$ne": "expirada"}
+            "estado": "ativa"    
         })
-        
-        return active_reservation is None
+
+        print(f"Reserva encontrada para a sala {room_id}: {active_or_reserved_reservation is not None}")
+
+        # Se não houver reservas ativas ou reservadas, a sala está livre
+        return active_or_reserved_reservation is None
     except Exception as e:
         print(f"Erro ao verificar se sala está livre: {str(e)}")
         return True

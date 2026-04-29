@@ -53,7 +53,7 @@ export const authApi = {
       body: JSON.stringify(payload),
     }),
   register: (payload: RegisterPayload) =>
-    request("/user/register", {
+    request<AuthUser>("/user/register", {
       method: "POST",
       body: JSON.stringify(payload),
     }),

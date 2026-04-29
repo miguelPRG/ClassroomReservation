@@ -161,14 +161,53 @@ async def auth_user(request: Request):
             f"Utilizador não encontrado para token com user_id={jwt.get('user_id')}"
         )
         response = JSONResponse(
-            status_code=401, content={"detail": "Utilizador não encontrado"}
+            status_code=401,
+            content={
+                "id": None,
+                "nome": None,
+                "email": None,
+                "role": None,
+                "detail": "Utilizador não encontrado",
+            },
         )
         response.delete_cookie(key="token")
         return response
 
-    return User(
-        id=str(user["_id"]),
-        nome=user.get("nome"),
-        email=user.get("email"),
-        role=user.get("role"),
-    )
+    # Verificar inconsistências no documento do utilizador com o token JWT
+    if str(user["_id"]) != jwt["user_id"] or user.get("role") != jwt["role"]:
+        logger.warning(
+            f"Inconsistência detectada para user_id={jwt.get('user_id')}: "
+            f"user_id no banco={str(user['_id'])}, role no banco={user.get('role')}, "
+            f"user_id no token={jwt.get('user_id')}, role no token={jwt.get('role')}"
+        )
+
+        # Gerar um novo token JWT com as informações corretas do banco de dados
+        new_jwt_token = generate_jwt(str(user["_id"]), user.get("role"))
+
+        response = JSONResponse(
+            status_code=401,
+            content={
+                "id": str(user["_id"]),
+                "nome": user.get("nome"),
+                "email": user.get("email"),
+                "role": user.get("role"),
+                "detail": "Token inconsistente. Novo token gerado.",
+            },
+        )
+        response.set_cookie(
+            key="token",
+            value=new_jwt_token,
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            path="/",
+            max_age=3600,
+        )
+        return response
+
+    return {
+        "id": str(user["_id"]),
+        "nome": user.get("nome"),
+        "email": user.get("email"),
+        "role": user.get("role"),
+    }
