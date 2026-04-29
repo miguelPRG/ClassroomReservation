@@ -2,30 +2,36 @@
 FROM python:3.14-slim
 
 # Set environment to production
-ENV PYTHONUNBUFFERED=1
-ENV PIP_NO_CACHE_DIR=1
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_CACHE_DIR=/tmp/.uv_cache
 
 # Define a non-root user and group
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+RUN groupadd -r appgroup && useradd -r -g appgroup -m appuser
 
 # Set the working directory
 WORKDIR /app
 
-# Copy dependency files and install dependencies
-COPY pyproject.toml uv.lock ./
-RUN pip install --no-cache-dir uv && uv sync --no-dev
+# Instalar o uv globalmente como root
+RUN pip install --no-cache-dir uv
 
-# Copy the rest of the application code
-COPY . .
+# Mudar o dono da pasta /app antes de instalar as dependências
+RUN chown appuser:appgroup /app
 
-# Change ownership of the application files to the non-root user
-RUN chown -R appuser:appgroup /app
-
-# Switch to the non-root user
+# Switch to the non-root user ANTES do uv sync
 USER appuser
 
-# Expose the port the application will run on
+# Copiar arquivos de dependências
+COPY --chown=appuser:appgroup pyproject.toml uv.lock ./
+
+# Instalar dependências como appuser (isso cria o .venv dentro de /app)
+RUN uv sync --no-dev
+
+# Copy the rest of the application code
+COPY --chown=appuser:appgroup . .
+
+# Expose the port
 EXPOSE 8000
 
 # Command to run the application
-CMD ["fastapi", "run"]
+CMD ["uv", "run", "fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]

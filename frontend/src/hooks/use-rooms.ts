@@ -47,16 +47,14 @@ export function useRoomQuery({
 export function useRoomQueryById(
   {
     roomID,
-    ativar = true,
   }: {
-    roomID: string;
-    ativar?: boolean;
+    roomID: string | undefined;
   } = {} as any,
 ) {
   return useQuery({
     queryKey: ["rooms", roomID],
     queryFn: () => roomApi.getById(roomID),
-    enabled: ativar && !!roomID,
+    enabled: !!roomID,
   });
 }
 

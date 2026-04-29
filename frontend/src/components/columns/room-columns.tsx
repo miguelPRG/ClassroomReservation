@@ -12,6 +12,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 
 const columnHelper = createColumnHelper<Room>();
 
@@ -19,6 +21,7 @@ function ActionsCell({ room }: { room: Room }) {
   const navigate = useNavigate();
   const deleteRoom = useRoomDelete();
   const isAdmin = useAuthStore((state) => state.isAdmin());
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleEdit = () => {
     navigate(`/room-edit/${room.id}`);
@@ -28,8 +31,12 @@ function ActionsCell({ room }: { room: Room }) {
     navigate(`/reservas/${room.id}`);
   };
 
-  const handleDelete = () => {
-    deleteRoom.mutate(room.id);
+  const handleDeleteConfirm = () => {
+    deleteRoom.mutate(room.id, {
+      onSuccess: () => {
+        setShowDeleteDialog(false);
+      },
+    });
   };
 
   return (
@@ -45,8 +52,8 @@ function ActionsCell({ room }: { room: Room }) {
           {isAdmin && (
             <>
               <DropdownMenuItem onClick={handleEdit}>Editar</DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={handleDelete} 
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
                 className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
               >
                 Apagar
@@ -58,6 +65,14 @@ function ActionsCell({ room }: { room: Room }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        itemType="sala"
+        onConfirm={handleDeleteConfirm}
+        isLoading={deleteRoom.isPending}
+      />
     </div>
   );
 }

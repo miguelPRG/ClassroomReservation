@@ -31,7 +31,7 @@ export function AlertDialog({
         className="fixed inset-0 bg-black/50"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative bg-card border border-border rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+      <div className="relative bg-card border border-border rounded-lg shadow-lg p-6 max-w-xl w-full mx-4">
         <h2 className="text-lg font-semibold mb-2 text-card-foreground">{title}</h2>
         <p className="text-sm text-muted-foreground mb-6">{description}</p>
         <div className="flex gap-3 justify-end">

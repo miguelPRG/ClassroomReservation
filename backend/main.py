@@ -49,7 +49,13 @@ app = FastAPI(
 
 # Middleware para permitir CORS (Cross-Origin Resource Sharing). CORS é necessário para permitir que o frontend acesse a API, especialmente se estiverem em domínios diferentes.
 
-ALLOW_ORIGINS = ["http://localhost:3000", "127.0.0.1"]
+# CORS - Aceita requisições do frontend (local e Docker)
+ALLOW_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -72,14 +78,15 @@ PUBLIC_PATHS = {
 @app.middleware("http")
 async def middleware(request: Request, call_next):
 
-    origin = request.headers.get("origin") or request.client.host
+    origin = request.headers.get("origin")
     logger.info(f"Request: {request.method} {request.url.path} - Origin: {origin}")
 
     if request.method == "OPTIONS":
         response = await call_next(request)
         return response
 
-    if origin not in ALLOW_ORIGINS:
+    # Validar origem apenas se estiver presente
+    if origin and origin not in ALLOW_ORIGINS:
         logger.warning(f"Origem não permitida: {origin}")
         return JSONResponse(status_code=403, content={"detail": "Origem não permitida"})
 
@@ -88,7 +95,7 @@ async def middleware(request: Request, call_next):
 
     path = request.url.path
 
-    # rotas públicas
+    # Rotas públicas - não requerem autenticação
     if path in PUBLIC_PATHS:
         logger.debug(f"Rota pública acedida: {path}")
         response = await call_next(request)

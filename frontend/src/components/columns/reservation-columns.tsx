@@ -10,7 +10,7 @@ import { useState } from "react";
 import type { Reservation } from "@/types/reservation";
 import { useReservationDelete } from "@/hooks/use-reservations";
 import { useAuthStore } from "@/stores/auth-store";
-import { AlertDialog } from "@/components/ui/alert-dialog";
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 
 const columnHelper = createColumnHelper<Reservation>();
 
@@ -53,15 +53,11 @@ function ActionsCell({ reservation }: { reservation: Reservation }) {
         </TooltipContent>
       </Tooltip>
 
-      <AlertDialog
+      <DeleteConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title="Apagar Reserva"
-        description="Tem a certeza que quer apagar esta reserva? Esta ação não pode ser desfeita."
-        cancelLabel="Cancelar"
-        actionLabel="Apagar"
-        onAction={handleDeleteConfirm}
-        isDestructive
+        itemType="reserva"
+        onConfirm={handleDeleteConfirm}
         isLoading={deleteReservation.isPending}
       />
     </>

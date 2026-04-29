@@ -88,6 +88,8 @@ async def create_user(user: UserCreate, request: Request):
 async def login_user(user: UserLogin, request: Request):
     """Autentica um utilizador. Verifica se o email existe e se a password é correta. Se a autenticação for bem-sucedida, gera um token JWT, atualiza a data do último login e retorna uma resposta com o token definido como cookie."""
 
+    print("User: ", user)
+
     existing_user = await database.user_collection.find_one({"email": user.email})
 
     if not existing_user or not password_hash.verify(

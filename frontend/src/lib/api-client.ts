@@ -2,7 +2,21 @@ import type { AuthUser, LoginPayload, RegisterPayload } from "@/types/auth";
 import type { RoomPayload, Room } from "@/types/room";
 import type { Reservation } from "@/types/reservation";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+// Determina a URL da API dinamicamente
+// Em produção, VITE_API_URL é definido no build e compilado como "/api"
+// Em desenvolvimento, usa a variável ou localhost como fallback
+const API_URL = (() => {
+  // Primeiro, tenta usar a variável que foi compilada pelo Vite
+  const viteApiUrl = import.meta.env.VITE_API_URL ;
+  if (viteApiUrl) {
+    return viteApiUrl;
+  }
+  // Se não estiver definida, em produção usa "/api", em dev usa localhost
+  if (import.meta.env.PROD) {
+    return "/api";
+  }
+  return "http://localhost:8000";
+})();
 
 export class ApiError extends Error {
   status?: number;
@@ -77,7 +91,9 @@ export const roomApi = {
         method: "GET",
       },
     ),
-  getById: (roomID: string) =>
+  getById: (roomID: string | null = null) =>
+    
+
     request<Room>(`/room/${roomID}`, {
       method: "GET",
     }),

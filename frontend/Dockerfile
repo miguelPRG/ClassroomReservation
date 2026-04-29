@@ -1,34 +1,42 @@
-# Use a lightweight Node.js image for production
-FROM node:24-alpine
-
-# Set environment to production
-ENV NODE_ENV=production
-
-# Define a non-root user and group
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Set the working directory
+# Etapa 1: Build (Node.js)
+FROM node:24-alpine AS build
 WORKDIR /app
 
-# Copy package files and install all dependencies
+# Copia arquivos de dependências
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci  # 'npm ci' é mais rápido e seguro para builds automatizados
 
-# Build the application for production
+# Copia o código e gera a build
 COPY . .
+
+# Build com variáveis de produção
+ENV NODE_ENV=production
+ENV VITE_API_URL=/api
 RUN npm run build
 
-# Remove development dependencies
-RUN npm prune --production
+# Remove dependências de desenvolvimento para a imagem final
+RUN npm prune --production  # Remove dependências de desenvolvimento para a imagem final
 
-# Change ownership of the application files to the non-root user
-RUN chown -R appuser:appgroup /app
+# ---
+# Etapa 2: Produção (Nginx)
+# ---
+FROM nginx:alpine
 
-# Switch to the non-root user
-USER appuser
+# 1. Prepara as permissões para o usuário nginx
+RUN touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid /var/cache/nginx /var/log/nginx
 
-# Expose the port the application will run on
-EXPOSE 80
+# 2. Copia a configuração customizada do Nginx (sem a diretiva "user")
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Command to run the application
-CMD ["npm", "start"]
+# 3. Copia os arquivos da build para o diretório do Nginx
+COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html
+
+# 4. Mudar para o usuário não-root (nginx)
+USER nginx
+
+# Expor a porta
+EXPOSE 8080
+
+# O comando para rodar o Nginx
+CMD ["nginx", "-g", "daemon off;"]
