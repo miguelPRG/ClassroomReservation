@@ -80,13 +80,13 @@ export const authApi = {
 
 export const roomApi = {
   create: (payload: RoomPayload) =>
-    request("/room", {
+    request("/room/", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
   list: (page?: number | null, pageSize?: number | null) =>
     request<Room[]>(
-      `/room${page !== undefined && page !== null ? `?page=${page}` : ""}${pageSize !== undefined && pageSize !== null ? `&page_size=${pageSize}` : ""}`,
+      `/room/${page !== undefined && page !== null ? `?page=${page}` : ""}${pageSize !== undefined && pageSize !== null ? `${page !== undefined && page !== null ? "&" : "?"}page_size=${pageSize}` : ""}`,
       {
         method: "GET",
       },
@@ -110,7 +110,7 @@ export const roomApi = {
 
 export const reservaApi = {
   create: (payload: any) =>
-    request("/reservation", {
+    request("/reservation/", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
