@@ -3,7 +3,11 @@ import os
 import secrets
 import base64
 from datetime import datetime, timedelta, timezone
+from fastapi.responses import JSONResponse
+from typing import Dict, Any
 
+# Variável de ambiente para detectar se a aplicação está rodando no Render.com
+IS_RENDER = os.getenv("RENDER", "false").lower() == "true"
 
 def _generate_secret() -> str:
     key = base64.urlsafe_b64encode(secrets.token_bytes(64)).decode().rstrip("=")
@@ -40,3 +44,37 @@ def validate_jwt(token: str) -> dict:
         raise Exception("Token expired")
     except jwt.InvalidTokenError:
         raise Exception("Invalid token")
+
+def create_secure_cookie_response(content, jwt_token, logger=None):
+    response = JSONResponse(content=content)
+    
+    # LOCAL (http://localhost)
+    if not IS_RENDER:
+        cookie_params = {
+            "key": "token",
+            "value": jwt_token,
+            "httponly": True,
+            "secure": False,  # localhost HTTP
+            "samesite": "Lax",
+            "path": "/",
+        }
+    # RENDER (HTTPS cross-domain)
+    else:
+        cookie_params = {
+            "key": "token",
+            "value": jwt_token,
+            "httponly": True,
+            "secure": True,
+            "samesite": "None",
+            "domain": "classroomreservation-4ny3.onrender.com",
+            "path": "/",
+        }
+    
+    response.set_cookie(**cookie_params)
+    
+    # LOG CRÍTICO
+    set_cookie_header = response.headers.get('set-cookie', 'MISSING!')
+    if logger:
+        logger.info(f"Set-Cookie: {set_cookie_header}")
+    
+    return response

@@ -27,6 +27,10 @@ RATE_LIMIT_REQUESTS = 15  # máximo de requisições
 RATE_LIMIT_WINDOW = 30  # segundos
 RATE_LIMIT_BLOCK_DURATION = 120  # 2 minutos em segundos
 
+# Variável de ambiente para detectar se a aplicação está rodando no Render.com
+IS_RENDER = os.getenv("RENDER", "false").lower() == "true"
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -63,9 +67,11 @@ ALLOW_ORIGINS_DEV = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "http://127.0.0.1:3000",
+    "https://classroom-reservation-bkde.vercel.app"
 ]
 
+# Esta variável de ambiente é definida no docker-compose.yml para produção, e pode ser usada para ajustar o comportamento da aplicação (ex: aceitar apenas tráfego do proxy interno do frontend em produção, mas permitir localhost em desenvolvimento).
 APP_ENV = os.getenv("APP_ENV", "development").lower()
 IS_PRODUCTION = APP_ENV == "production"
 INTERNAL_PROXY_HEADER = "x-internal-proxy"
@@ -80,9 +86,12 @@ app.add_middleware(
 )
 
 PUBLIC_PATHS = {
-    "/",
     "/user/login",
     "/user/register",
+}
+
+INFO_PATHS = {
+    "/",
     "/docs",
     "/openapi.json",
     "/redoc",
@@ -130,6 +139,7 @@ async def middleware(request: Request, call_next):
         return response
 
     if IS_PRODUCTION:
+        
         # Em produção, só aceita tráfego que chega pelo proxy interno do frontend.
         proxy_marker = request.headers.get(INTERNAL_PROXY_HEADER)
         if proxy_marker != INTERNAL_PROXY_VALUE:
@@ -157,10 +167,19 @@ async def middleware(request: Request, call_next):
 
     # Rotas públicas - não requerem autenticação
     if path in PUBLIC_PATHS:
+
         logger.debug(f"Rota pública acedida: {path}")
         response = await call_next(request)
         logger.info(f"Response: {path} - Status {response.status_code}")
         return response
+
+    # Rotas de documentação - estas rotas devem estar desativadas em produção, mas podem ser acessadas sem autenticação em desenvolvimento para facilitar testes.
+    if path in INFO_PATHS and not IS_RENDER:
+        logger.warning(f"Rota de documentação acedida: {path}")
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Acesso à documentação restrito em produção"},
+        )
 
     token = request.cookies.get("token")
     if not token:

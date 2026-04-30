@@ -11,6 +11,11 @@ const API_URL = (() => {
   if (viteApiUrl) {
     return viteApiUrl;
   }
+
+  else{
+    // Verificar se temos uma variável de ambiente definida no .env
+
+  }
   // Se não estiver definida, em produção usa "/api", em dev usa localhost
   if (import.meta.env.PROD) {
     return "/api";
@@ -30,6 +35,7 @@ export class ApiError extends Error {
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
+  cred: RequestCredentials = "include",
 ): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set("Content-Type", "application/json");
@@ -38,7 +44,7 @@ async function request<T>(
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
-    credentials: "include",
+    credentials: cred,
   });
 
   if (!response.ok) {

@@ -11,7 +11,7 @@ export function Header() {
   const role = useAuthStore((state) => state.role);
 
   const handleLogout = () => {
-    logout();
+    logout.mutate();
   };
 
   return (

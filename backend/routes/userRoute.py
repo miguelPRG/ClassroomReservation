@@ -5,8 +5,9 @@ from models.userModel import UserCreate, UserLogin, UserLogout, User
 import database
 from bson import ObjectId
 from pwdlib import PasswordHash
-from controller.jwtValidation import generate_jwt
+from controller.jwtValidation import generate_jwt, create_secure_cookie_response
 from pymongo.errors import DuplicateKeyError
+import os
 
 userRouter = APIRouter(prefix="/user", tags=["User"])
 password_hash = PasswordHash.recommended()
@@ -58,23 +59,15 @@ async def create_user(user: UserCreate, request: Request):
 
     jwt_token = generate_jwt(str(new_user_id), user_dict["role"])
 
-    response = JSONResponse(
-        content=User(
+    content=User(
             id=str(new_user_id),
             nome=user.nome,
             email=user.email,
             role=user_dict["role"],
         ).model_dump()
-    )
-    response.set_cookie(
-        key="token",
-        value=jwt_token,
-        httponly=True,
-        secure=True,
-        samesite="Strict",
-        max_age=24 * 3600,
-    )
-    return response
+    
+    return create_secure_cookie_response(content, jwt_token, logger)
+ 
 
 
 @userRouter.post(
@@ -102,27 +95,14 @@ async def login_user(user: UserLogin, request: Request):
         {"_id": existing_user["_id"]}, {"$set": {"last_login": request.state.now}}
     )
 
-    response = JSONResponse(
-        content=User(
+    content=User(
             id=str(existing_user["_id"]),
-            nome=existing_user.get("nome"),
-            email=existing_user.get("email"),
-            role=existing_user.get("role"),
+            nome=existing_user["nome"],
+            email=existing_user["email"],
+            role=existing_user["role"],
         ).model_dump()
-    )
-    response.set_cookie(
-        key="token",
-        value=jwt_token,
-        httponly=True,
-        secure=False,
-        samesite="Lax",
-        path="/",
-        max_age=3600,
-    )
 
-    logger.info(f"Login bem-sucedido para email: {user.email}")
-
-    return response
+    return create_secure_cookie_response(content, jwt_token, logger)
 
 
 @userRouter.post(
@@ -184,26 +164,15 @@ async def auth_user(request: Request):
         # Gerar um novo token JWT com as informações corretas do banco de dados
         new_jwt_token = generate_jwt(str(user["_id"]), user.get("role"))
 
-        response = JSONResponse(
-            status_code=401,
-            content={
-                "id": str(user["_id"]),
-                "nome": user.get("nome"),
-                "email": user.get("email"),
-                "role": user.get("role"),
-                "detail": "Token inconsistente. Novo token gerado.",
-            },
-        )
-        response.set_cookie(
-            key="token",
-            value=new_jwt_token,
-            httponly=True,
-            secure=False,
-            samesite="Lax",
-            path="/",
-            max_age=3600,
-        )
-        return response
+        content=User(
+            id=str(user["_id"]),
+            nome=user.get("nome"),
+            email=user.get("email"),
+            role=user.get("role"),
+        ).model_dump()
+    
+        # Criar uma resposta com o novo token JWT definido como cookie
+        return create_secure_cookie_response(content, new_jwt_token, logger)
 
     return {
         "id": str(user["_id"]),

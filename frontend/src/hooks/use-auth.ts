@@ -76,9 +76,19 @@ export function useLogout() {
   const setUser = useAuthStore((state) => state.setUser);
   const setRole = useAuthStore((state) => state.setRole);
 
-  return () => {
-    setUser(null);
-    setRole(null);
-    toast.info("Sessão terminada.");
-  };
+  return useMutation({
+    mutationFn: () => authApi.logout(),
+    onSuccess: () => {
+      setUser(null);
+      setRole(null);
+      toast.success("Logout efetuado com sucesso.");
+    },
+    onError: (error) => {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : "Não foi possível finalizar sessão.";
+      toast.error(message);
+    },
+  });
 }
